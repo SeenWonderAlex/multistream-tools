@@ -275,9 +275,9 @@
                     b("CurrentPoll").style = "";
                     window.scrollTo(0, document.body.scrollHeight);
                     IntervalIDForPoll = setInterval(UpdatePollResponses, 150);
-                    PollStarttime = new Date();
-                    PollEndtime = new Date();
-                    PollEndtime.setSeconds(PollEndtime.getSeconds() + Number.parseInt(b("Editor_PollDuration").value) - 1);
+                    // PollStarttime = new Date();
+                    // PollEndtime = new Date();
+                    // PollEndtime.setSeconds(PollEndtime.getSeconds() + Number.parseInt(b("Editor_PollDuration").value) - 1);
                 }
             }, 250);
         }
