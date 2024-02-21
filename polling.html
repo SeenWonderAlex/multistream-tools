@@ -92,7 +92,8 @@
 
     <details id="YouTubeConnection" open>
         <summary>Connect with YouTube</summary>
-        <span>Type your YouTube Stream URL in order to connect with YouTube. Make sure you have the provided Multistreaming YouTube extension.</span>
+        <span>Type your YouTube Stream URL in order to connect with YouTube. Make sure you have the provided
+            Multistreaming YouTube extension.</span>
         <br>
         <input id="YouTubeURL" class="YU1" type="url">
         <button onclick="LoadURL();" class="YU2">Load</button>
@@ -223,7 +224,7 @@
             let Options = [];
             for (var i = 0; i < PE_O.length; i++) {
                 if (PE_O[i].length > 0) {
-                    Options.push({ "title": PE_O[i] });
+                    Options.push({ "title": PE_O[i].substring(0, 25) });
                 }
             }
             b("YTChatDocument").contentWindow.postMessage("Post_Poll", "*");
@@ -240,7 +241,7 @@
                     },
                     "body": JSON.stringify({
                         "broadcaster_id": user_id,
-                        "title": PE_Q,
+                        "title": PE_Q.substring(0, 60),
                         "choices": Options,
                         "duration": Number.parseInt(b("Editor_PollDuration").value)
                     })
@@ -425,8 +426,7 @@
                 if (ev.data.MessageType == "OptionsAvailable") {
                     console.log("[YT Poll] No poll is currently active.")
                     ConnectedYTPoll = "NONE";
-                    if (ConnectedPollID == "NONE" && b("CurrentPoll").style.display == "none" && b("PleaseWait").style.display == "none" &&  b("CreatePollEditor").style.display == "none")
-                    {
+                    if (ConnectedPollID == "NONE" && b("CurrentPoll").style.display == "none" && b("PleaseWait").style.display == "none" && b("CreatePollEditor").style.display == "none") {
                         b("CreatePollEditor").style = "";
                     }
                 }
