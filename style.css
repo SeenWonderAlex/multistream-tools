@@ -1,0 +1,124 @@
+.PollProgress {
+    width: 100%;
+    background-color: grey;
+    border-radius: 25px;
+}
+
+.PollProgressBar {
+    width: 0%;
+    height: 12px;
+    border-radius: 25px;
+    background-color: green;
+    transition: width 0.4s linear; /* note this line */
+}
+
+.RedColor {
+    background-color: red;
+}
+
+#PollDuration {
+    text-align: center;
+}
+
+* {
+    background: rgb(26, 26, 26);
+    color: rgb(239, 239, 241);
+    font-family: Roobert, Inter, "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+a {
+    color: rgb(169, 112, 255);
+}
+th, td {
+    border-right: 1px solid rgb(239, 239, 241);
+    border-bottom: 1px solid rgb(239, 239, 241);
+    padding: 5px 10px;
+}
+table.noborder, table.noborder th, table.noborder td {
+    border: 0px;
+    padding: 0px;
+}
+input[disabled] {
+    background: #3e0000;
+}
+input, select { width: 100%; }
+select {
+    transition: 0.3s;
+    border-radius: 6px;
+    border-width: 2px;
+    border-color: white;
+}
+input[type="submit"] {
+    background: rgb(82, 0, 82);
+    cursor: pointer;
+}
+input[type="submit"]:hover, button:hover {
+    background: rgb(24, 163, 70)
+}
+input[type="button"], button {
+    background: #33c34e;
+    cursor: pointer;
+    width: 100%;
+    height: 32px;
+    border-radius: 12px;
+    border-width: 0px;
+    transition: 0.3s;
+    font-size: 18;
+}
+
+.SubmitPoll {
+    background: #c60000;
+}
+.SubmitPoll:hover {
+    background: #b40000;
+}
+
+.PollQuestion {
+    font-size: 18px;
+    text-decoration: underline;
+    font-style: inherit;
+    font-weight: bold;
+}
+
+.PollQuestionInfo {
+    font-size: 18px;
+    font-style: inherit;
+}
+
+#status {
+    display: none;
+    background: red;
+    padding: 5px;
+}
+#status.show {
+    display: block;
+}
+
+.disableit {
+    position: relative;
+}
+.disableit:after {
+    content: '';
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    right: 0px;
+    bottom: 0px;
+    background: rgba(0,0,0,0.5);
+}
+
+.YU1 {
+    transition: 0.3s;
+    border-radius: 6px;
+    border-width: 2px;
+    border-color: white;
+    width: 100%;
+    height: 25px;
+}
+
+
+.YU2 {
+    width: 100%;
+    height: 25px;
+    border-radius: 6px;
+    font-size: 16px;
+}

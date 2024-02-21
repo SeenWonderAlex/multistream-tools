@@ -1,0 +1,25 @@
+<html>
+
+<head>
+    <title>Multistreaming Tools</title>
+    <link rel="stylesheet" href="./style.css" />
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+</head>
+
+<body>
+    <span style="font-size: 30px;">Multistream Tools</span>
+    <br>
+    <a style="color: white;">Polls</a>
+    <a id="PollLink" href="./polling.html">Page</a>
+    <a onclick="Popout('PollLink')" href="#popup">Popout</a>
+    <script type="text/javascript">
+        function Popout(ID) {
+            window.open(document.getElementById(ID).href, "_blank", "popup=yes");
+        }
+        setTimeout(() => {
+            document.getElementsByTagName('div')[0].style.opacity = 0;
+        }, 250) // In order to fix.
+    </script>
+</body>
+
+</html>
