@@ -514,6 +514,8 @@
                         PastMessageIDs.push(metadata.message_id);
                         let { event } = payload;
                         ConnectedPollID = event.id;
+                        PollStarttime = new Date(event.started_at);
+                        PollEndtime = new Date(event.ends_at);
                         SetTwitchPoll(event, true);
                     });
                     socket_space.on('channel.poll.progress', (msg) => {
