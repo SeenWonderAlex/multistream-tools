@@ -291,7 +291,7 @@
             localStorage.setItem("saved_url", URL);
             var regExp = /.*(?:youtu.be\/|v\/|u\/\w\/|live\/|watch\?v=)([^#\&\?]*).*/;
             try {
-                b("YTChatDocument").src = "https://youtube.com/live_chat?v=" + (URL.match(regExp)[1] ?? "none");
+                b("YTChatDocument").src = "https://youtube.com/live_chat?v=" + (URL.match(regExp)[1] ?? "none") + "&embed_domain=seenwonderalex.github.io";
                 let OldText = b("YouTubeConnection").querySelector("span").innerText;
                 if (!OldText.includes("invalid") && !OldText.includes("load")) {
                     b("YouTubeConnection").querySelector("span").innerText = "YouTube Chat successfully loaded!";
@@ -455,7 +455,7 @@
                     if (window.location.hash.length > 0) window.location.hash = "#authorized";
                     localStorage.setItem("saved_access_token", token);
                     document.getElementById("AuthRequired").style = 'display: none;';
-                    b("TwitchChatDummyDoc").src = "https://www.twitch.tv/popout/" + resp.data[0].login + "/chat"
+                    b("TwitchChatDummyDoc").src = "https://www.twitch.tv/popout/" + resp.data[0].login + "/chat?parent=seenwonderalex.github.io"
                     SetPleaseWait("Waiting for YouTube & Twitch...");
                     var CheckForPolls = setInterval(() => {
                         if (b("TwitchChatDummyDoc").src == "about:blank" || b("YTChatDocument").src == "about:blank") {
