@@ -9,7 +9,8 @@
     height: 12px;
     border-radius: 25px;
     background-color: green;
-    transition: width 0.4s linear; /* note this line */
+    transition: width 0.4s linear;
+    /* note this line */
 }
 
 .RedColor {
@@ -25,36 +26,53 @@
     color: rgb(239, 239, 241);
     font-family: Roobert, Inter, "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
+
 a {
     color: rgb(169, 112, 255);
 }
-th, td {
+
+th,
+td {
     border-right: 1px solid rgb(239, 239, 241);
     border-bottom: 1px solid rgb(239, 239, 241);
     padding: 5px 10px;
 }
-table.noborder, table.noborder th, table.noborder td {
+
+table.noborder,
+table.noborder th,
+table.noborder td {
     border: 0px;
     padding: 0px;
 }
+
 input[disabled] {
     background: #3e0000;
 }
-input, select { width: 100%; }
+
+input,
+select {
+    width: 100%;
+}
+
 select {
     transition: 0.3s;
     border-radius: 6px;
     border-width: 2px;
     border-color: white;
 }
+
 input[type="submit"] {
     background: rgb(82, 0, 82);
     cursor: pointer;
 }
-input[type="submit"]:hover, button:hover {
+
+input[type="submit"]:hover,
+button:hover {
     background: rgb(24, 163, 70)
 }
-input[type="button"], button {
+
+input[type="button"],
+button {
     background: #33c34e;
     cursor: pointer;
     width: 100%;
@@ -68,6 +86,7 @@ input[type="button"], button {
 .SubmitPoll {
     background: #c60000;
 }
+
 .SubmitPoll:hover {
     background: #b40000;
 }
@@ -89,6 +108,7 @@ input[type="button"], button {
     background: red;
     padding: 5px;
 }
+
 #status.show {
     display: block;
 }
@@ -96,6 +116,7 @@ input[type="button"], button {
 .disableit {
     position: relative;
 }
+
 .disableit:after {
     content: '';
     position: absolute;
@@ -103,7 +124,7 @@ input[type="button"], button {
     left: 0px;
     right: 0px;
     bottom: 0px;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.5);
 }
 
 .YU1 {
@@ -121,4 +142,67 @@ input[type="button"], button {
     height: 25px;
     border-radius: 6px;
     font-size: 16px;
+}
+
+/* The switch - the box around the slider */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/* The slider */
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+input:checked+.slider {
+    background-color: #2196F3;
+}
+
+input:focus+.slider {
+    box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked+.slider:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
 }

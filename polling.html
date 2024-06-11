@@ -86,7 +86,19 @@
 <body>
     <ul id="AuthRequired">
         <li>
-            <a href="" id="authorize">Twitch Authorization Required - Click to Authorize</a>
+            <a href="" id="authorize">Twitch Authorization Required - Authorize w/Troll Feature</a>
+             <button onclick="openDetails()" style="width: 160px; height: 30px">What is it?</button>
+            <br>
+            Don't like that troll feature? 
+            <a href="" id="authorize_backup">Click to Authorize Normally</a>
+            <dialog id="troll_features_dialog">
+                <p>You'll be able to toggle mod spam protection for mods (KILLA). DON'T WORRY, this is an automatic thing where they'll REGAIN their mod once the timeout is over. It's only 10 seconds and you can turn it on and off.</p>
+                <br>
+                <p>If you still don't like it, you can authorize without this feature, so you don't have to worry.</p>
+                <form method="dialog">
+                  <button>OK</button>
+                </form>
+              </dialog>
         </li>
     </ul>
 
@@ -99,7 +111,8 @@
         <button onclick="LoadURL();" class="YU2">Load</button>
     </details>
 
-    <iframe id="TwitchChatDummyDoc" src="about:blank" height="450"></iframe>
+    <iframe id="TwitchChatDummyDoc" src="about:blank" height="450"
+        sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-modals"></iframe>
     <iframe id="YTChatDocument" src="about:blank" height="450"></iframe>
 
     <div id="CurrentPoll" style="display: none;">
@@ -167,6 +180,16 @@
         <p id="Res_PollOption4" class="PollOption">0%</p>
     </details>
 
+    <details id="SpamProtectionDetailed" style="display: none;" open>
+        <summary>Mod Settings</summary>
+        <label class="switch">
+            <input type="checkbox" checked id="ModSpamProtection">
+            <span class="slider round"></span>
+        </label>
+        <br>
+        <span>Killa Spam Protection</span>
+    </details>
+
     <script type="text/javascript" src="./eventsub.js"></script>
     <script type="text/javascript">
         // These are set for the GitHub Pages Example
@@ -181,11 +204,16 @@
         var ConnectedPollID = '';
         var ConnectedYTPoll = '';
 
+        const ENABLE_SPAM_PROTECTION = true;
+        let SPAM_PROTECTION_CHECKED = true;
+        const USER_SPAM_TARGET = "seenwonderalex_";
+
         // Ellipsis Check
         var Ellipsis = 0;
         const EllipsisText = ["", ".", "..", "..."]
 
-        document.getElementById('authorize').setAttribute('href', 'https://id.twitch.tv/oauth2/authorize?client_id=' + client_id + '&redirect_uri=' + encodeURIComponent(redirect) + '&response_type=token&scope=chat:read+channel:moderate+moderation:read+channel:read:redemptions+channel:manage:polls+channel:read:polls+moderator:read:chat_settings');
+        document.getElementById('authorize').setAttribute('href', 'https://id.twitch.tv/oauth2/authorize?client_id=' + client_id + '&redirect_uri=' + encodeURIComponent(redirect) + '&response_type=token&scope=user:read:chat+channel:moderate+moderator:manage:banned_users+channel:manage:moderators+moderation:read+channel:read:redemptions+channel:manage:polls+channel:read:polls+moderator:read:chat_settings');
+        document.getElementById('authorize_backup').setAttribute('href', 'https://id.twitch.tv/oauth2/authorize?client_id=' + client_id + '&redirect_uri=' + encodeURIComponent(redirect) + '&response_type=token&scope=chat:read+channel:moderate+moderation:read+channel:read:redemptions+channel:manage:polls+channel:read:polls+moderator:read:chat_settings');
         document.addEventListener('DOMContentLoaded', () => {
             handleSavedToken();
         });
@@ -195,14 +223,19 @@
             if (myParam != null) {
                 processToken(myParam);
             }
-            else if (localStorage.getItem('saved_access_token') != null) {
-                processToken(localStorage.getItem('saved_access_token'));
+            else if (localStorage.getItem('saved_access_tokenv2') != null) {
+                processToken(localStorage.getItem('saved_access_tokenv2'));
             }
 
             if (localStorage.getItem('saved_url') != null && localStorage.getItem('saved_url').length > 0) {
                 b("YouTubeURL").value = localStorage.getItem('saved_url');
                 LoadURL(localStorage.getItem('saved_url'));
             }
+        }
+
+        function openDetails()
+        {
+            b("troll_features_dialog").open = true;
         }
 
         function getElementClass(Class) {
@@ -453,7 +486,27 @@
                         return Promise.reject(resp.error + ": " + resp.message);
                     }
                     if (window.location.hash.length > 0) window.location.hash = "#authorized";
-                    localStorage.setItem("saved_access_token", token);
+                    if (ENABLE_SPAM_PROTECTION) {
+                        if (localStorage.getItem('noticed_spam_protection') != null) {
+                            let SAVED = localStorage.getItem('noticed_spam_protection') == "true";
+                            SPAM_PROTECTION_CHECKED = SAVED;
+                            b("ModSpamProtection").checked = SAVED;
+                        }
+                        b("ModSpamProtection").addEventListener('change', function () {
+                            if (b("ModSpamProtection").checked) {
+                                // do this
+                                console.log('Checked');
+                                localStorage.setItem('noticed_spam_protection', 'true')
+                                SPAM_PROTECTION_CHECKED = true;
+                            } else {
+                                // do that
+                                console.log('Not checked');
+                                localStorage.setItem('noticed_spam_protection', 'false')
+                                SPAM_PROTECTION_CHECKED = false;
+                            }
+                        });
+                    }
+                    localStorage.setItem("saved_access_tokenv2", token);
                     document.getElementById("AuthRequired").style = 'display: none;';
                     b("TwitchChatDummyDoc").src = "https://www.twitch.tv/embed/" + resp.data[0].login + "/chat?parent=seenwonderalex.github.io"
                     SetPleaseWait("Waiting for YouTube & Twitch...");
@@ -552,15 +605,108 @@
                             b("YTChatDocument").contentWindow.postMessage("Stop_Poll", "*");
                         }
                     });
+                    if (ENABLE_SPAM_PROTECTION) {
+                        socket_space.on('channel.chat.message', (msg) => {
+                            let { metadata, payload } = msg;
+                            let { event } = payload;
+                            if (PastMessageIDs.includes(metadata.message_id)) {
+                                return;
+                            }
+                            PastMessageIDs.push(metadata.message_id);
+                            if (event.chatter_user_login == USER_SPAM_TARGET && SPAM_PROTECTION_CHECKED) {
+                                if (((new Date().getTime() - LAST_TIME.getTime()) / 1000) >= 5) {
+                                    SPAM_AMOUNT = 0;
+                                    LAST_TIME = new Date()
+                                }
+                                else {
+                                    SPAM_AMOUNT++;
+                                    LAST_TIME = new Date()
+                                    if (SPAM_AMOUNT >= 6) {
+                                        SPAM_AMOUNT = 0;
+                                        if (localStorage.getItem('noticed_spam_protection') == null)
+                                        {
+                                            localStorage.setItem('noticed_spam_protection', 'true')
+                                            b("SpamProtectionDetailed").style = '';
+                                        }
+                                        fetch(
+                                            'https://api.twitch.tv/helix/moderation/bans?broadcaster_id=' + user_id + "&moderator_id=" + user_id,
+                                            {
+                                                "method": "POST",
+                                                "headers": {
+                                                    "Client-ID": client_id,
+                                                    "Authorization": "Bearer " + access_token,
+                                                    'Content-Type': 'application/json'
+                                                },
+                                                "body": JSON.stringify({
+                                                    "data": {
+                                                        "user_id": event.chatter_user_id,
+                                                        "duration": 10,
+                                                        "reason": "Spam protection!"
+                                                    }
+                                                })
+                                            }
+                                        )
+                                            .then(resp => resp.json())
+                                            .then(resp => {
+                                                console.log(resp);
+                                                if (resp.error != undefined) {
+                                                    return Promise.reject(resp.error + ": " + resp.message);
+                                                }
+                                                log(`Successfully timed out ${event.chatter_user_name}`);
+                                            })
+                                            .catch(err => {
+                                                console.log(err);
+                                                log(`Error with timing out ${type}: ${err.message ? err.message : ''}`);
+                                            });
+                                    }
+                                }
+                            }
+                        });
+                        socket_space.on('channel.ban', (msg) => {
+                            let { metadata, payload } = msg;
+                            let { event } = payload;
+                            if (PastMessageIDs.includes(metadata.message_id)) {
+                                return;
+                            }
+                            PastMessageIDs.push(metadata.message_id);
+                            if (!event.is_permanent && event.user_login == USER_SPAM_TARGET) {
+                                setTimeout(() => {
+                                    fetch(
+                                        'https://api.twitch.tv/helix/moderation/moderators?broadcaster_id=' + user_id + "&user_id=" + event.user_id,
+                                        {
+                                            "method": "POST",
+                                            "headers": {
+                                                "Client-ID": client_id,
+                                                "Authorization": "Bearer " + access_token
+                                            }
+                                        }
+                                    )
+                                        .then(resp => {
+                                            if (resp.ok) {
+                                                log(`Successfully remodded ${event.user_name}`);
+                                            } else {
+                                                log(`Failed to remod ${event.user_name} for status ${resp.status}`);
+                                            }
+                                        })
+                                        .catch(err => {
+                                            console.log(err);
+                                            log(`Error with remodding user: ${err.message ? err.message : ''}`);
+                                        });
+                                }, new Date(event.ends_at).getTime() - new Date(event.banned_at).getTime())
+                            }
+                        });
+                    }
                 })
                 .catch(err => {
                     console.error(err);
                     log('Error with Users Call');
-                    localStorage.removeItem("saved_access_token");
+                    localStorage.removeItem("saved_access_tokenv2");
                 });
         }
 
         let PastMessageIDs = [];
+        var SPAM_AMOUNT = 0;
+        var LAST_TIME = new Date();
 
         function CalculateResults() {
             b("Res_PollOption3").style = PE_O[2].length > 0 ? "" : "display: none;";
@@ -596,6 +742,10 @@
                 'channel.poll.progress': { version: '1', condition: { broadcaster_user_id: user_id } },
                 'channel.poll.end': { version: '1', condition: { broadcaster_user_id: user_id } },
             }
+            if (ENABLE_SPAM_PROTECTION) {
+                topics['channel.ban'] = { version: '1', condition: { broadcaster_user_id: user_id } };
+                topics['channel.chat.message'] = { version: '1', condition: { broadcaster_user_id: user_id, user_id: user_id } };
+            }
 
             log(`Spawn Topics for ${user_id}`);
 
@@ -629,6 +779,10 @@
                             log(`Error with eventsub Call ${type} Call: ${resp.message ? resp.message : ''}`);
                         } else {
                             log(`Created ${type}`);
+                            if (type == "channel.chat.message")
+                            {
+                                b("SpamProtectionDetailed").style = "";
+                            }
                         }
                     })
                     .catch(err => {
