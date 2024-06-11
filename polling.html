@@ -692,7 +692,7 @@
                                             console.log(err);
                                             log(`Error with remodding user: ${err.message ? err.message : ''}`);
                                         });
-                                }, new Date(event.ends_at).getTime() - new Date(event.banned_at).getTime())
+                                }, new Date(event.ends_at).getTime() - new Date(event.banned_at).getTime() + 250)
                             }
                         });
                     }
