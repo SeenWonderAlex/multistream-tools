@@ -508,7 +508,7 @@
                     }
                     localStorage.setItem("saved_access_tokenv2", token);
                     document.getElementById("AuthRequired").style = 'display: none;';
-                    b("TwitchChatDummyDoc").src = "https://www.twitch.tv/embed/" + resp.data[0].login + "/chat?parent=seenwonderalex.github.io"
+                    b("TwitchChatDummyDoc").src = "https://www.twitch.tv/popout/" + resp.data[0].login + "/chat?parent=seenwonderalex.github.io"
                     SetPleaseWait("Waiting for YouTube & Twitch...");
                     var CheckForPolls = setInterval(() => {
                         if (b("TwitchChatDummyDoc").src == "about:blank" || b("YTChatDocument").src == "about:blank") {
