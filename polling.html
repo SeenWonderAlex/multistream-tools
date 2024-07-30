@@ -86,21 +86,24 @@
 <body>
     <ul id="AuthRequired">
         <li>
-            <a href="" id="authorize">Twitch Authorization Required - Authorize w/Troll Feature</a>
-             <button onclick="openDetails()" style="width: 160px; height: 30px">What is it?</button>
+            <a href="" id="authorize">Twitch Authorization Required - Authorize</a>
+            <!-- <button onclick="openDetails()" style="width: 160px; height: 30px">What is it?</button>
             <br>
             Don't like that troll feature? 
-            <a href="" id="authorize_backup">Click to Authorize Normally</a>
-            <dialog id="troll_features_dialog">
-                <p>You'll be able to toggle mod spam protection for mods (KILLA). DON'T WORRY, this is an automatic thing where they'll REGAIN their mod once the timeout is over. It's only 10 seconds and you can turn it on and off.</p>
-                <br>
-                <p>If you still don't like it, you can authorize without this feature, so you don't have to worry.</p>
-                <form method="dialog">
-                  <button>OK</button>
-                </form>
-              </dialog>
+            <a href="" id="authorize_backup">Click to Authorize Normally</a> -->
         </li>
     </ul>
+
+    <dialog id="yes_or_no_confirmation">
+        <p>It looks like you're going to run a YES or NO poll. Are you sure this is the poll you're creating?</p>
+        <br>
+        <form method="dialog">
+            <button onclick="SubmitPoll()">Yes & Run Poll</button>
+            <br>
+            <br>
+            <button class="SubmitPoll">No & Edit Poll</button>
+        </form>
+    </dialog>
 
     <details id="YouTubeConnection" open>
         <summary>Connect with YouTube</summary>
@@ -167,7 +170,7 @@
             <option value="1800">30 Minutes</option>
         </select>
         <br>
-        <button onclick="SubmitPoll()">Create Poll</button>
+        <button onclick="CheckPoll()">Create Poll</button>
     </div>
 
     <details id="PollResultsDiv" open style="display: none;">
@@ -180,7 +183,7 @@
         <p id="Res_PollOption4" class="PollOption">0%</p>
     </details>
 
-    <details id="SpamProtectionDetailed" style="display: none;" open>
+    <!-- <details id="SpamProtectionDetailed" style="display: none;" open>
         <summary>Mod Settings</summary>
         <label class="switch">
             <input type="checkbox" checked id="ModSpamProtection">
@@ -188,7 +191,7 @@
         </label>
         <br>
         <span>Killa Spam Protection</span>
-    </details>
+    </details> -->
 
     <script type="text/javascript" src="./eventsub.js"></script>
     <script type="text/javascript">
@@ -204,16 +207,17 @@
         var ConnectedPollID = '';
         var ConnectedYTPoll = '';
 
-        const ENABLE_SPAM_PROTECTION = true;
+        const ENABLE_SPAM_PROTECTION = false;
         let SPAM_PROTECTION_CHECKED = true;
         const USER_SPAM_TARGET = "killalalas_";
 
         // Ellipsis Check
         var Ellipsis = 0;
+        var redemptions = [];
         const EllipsisText = ["", ".", "..", "..."]
 
-        document.getElementById('authorize').setAttribute('href', 'https://id.twitch.tv/oauth2/authorize?client_id=' + client_id + '&redirect_uri=' + encodeURIComponent(redirect) + '&response_type=token&scope=user:read:chat+channel:moderate+moderator:manage:banned_users+channel:manage:moderators+moderation:read+channel:read:redemptions+channel:manage:polls+channel:read:polls+moderator:read:chat_settings');
-        document.getElementById('authorize_backup').setAttribute('href', 'https://id.twitch.tv/oauth2/authorize?client_id=' + client_id + '&redirect_uri=' + encodeURIComponent(redirect) + '&response_type=token&scope=chat:read+channel:moderate+moderation:read+channel:read:redemptions+channel:manage:polls+channel:read:polls+moderator:read:chat_settings');
+        // document.getElementById('authorize').setAttribute('href', 'https://id.twitch.tv/oauth2/authorize?client_id=' + client_id + '&redirect_uri=' + encodeURIComponent(redirect) + '&response_type=token&scope=user:read:chat+channel:moderate+moderator:manage:banned_users+channel:manage:moderators+moderation:read+channel:read:redemptions+channel:manage:polls+channel:read:polls+moderator:read:chat_settings');
+        document.getElementById('authorize').setAttribute('href', 'https://id.twitch.tv/oauth2/authorize?client_id=' + client_id + '&redirect_uri=' + encodeURIComponent(redirect) + '&response_type=token&scope=chat:read+channel:moderate+moderation:read+channel:read:redemptions+channel:manage:polls+channel:read:polls+moderator:read:chat_settings');
         document.addEventListener('DOMContentLoaded', () => {
             handleSavedToken();
         });
@@ -233,10 +237,10 @@
             }
         }
 
-        function openDetails()
-        {
-            b("troll_features_dialog").open = true;
-        }
+        // function openDetails()
+        // {
+        //     b("troll_features_dialog").open = true;
+        // }
 
         function getElementClass(Class) {
             return document.getElementsByClassName(Class).length > 0 ? document.getElementsByClassName(Class)[0] : null;
@@ -246,10 +250,70 @@
             return document.getElementById(Id);
         }
 
+        function GetRedemptionData(ID) {
+            for (var i = 0; i < redemptions.length; i++) {
+                if (redemptions[i].id == ID) {
+                    return redemptions[i];
+                }
+            }
+            return null;
+        }
+
+        function LoadCached() {
+            if (localStorage.getItem("cached") != null) {
+                redemptions = [];
+                var b = (localStorage.getItem("cached")).split("~=~");
+                b.forEach(ele => {
+                    let a = JSON.parse(ele);
+                    let date = new Date(a.redeemed_at);
+                    if ((new Date().getTime() - date.getTime()) < 86400000) {
+                        redemptions.push(a);
+                    }
+                });
+                SaveCached();
+            }
+        }
+        function SaveCached() {
+            var array = [];
+            redemptions.forEach(ele => {
+                array.push(JSON.stringify(ele));
+            });
+            localStorage.setItem("cached", array.join("~=~"));
+        }
+
+        function AddRedemption(data) {
+            redemptions.unshift(data);
+            SaveCached();
+        }
+
+        function UpdateRedemption(data) {
+            var A = -1;
+            for (var i = 0; i < redemptions.length; i++) {
+                if (redemptions[i].id == data.id) {
+                    A = i;
+                    break;
+                }
+            }
+            if (A != -1) {
+                redemptions[A] = data;
+                SaveCached();
+            }
+        }
+
         let IntervalID = 0;
 
         function PingFrame() {
             b("YTChatDocument").contentWindow.postMessage("Wait_Check", "*");
+        }
+
+        function CheckPoll() {
+            if (PE_Q == "Vote..." && PE_0[0] == "Yes" && PE_0[1] == "No") {
+                b("yes_or_no_confirmation").open = true;
+            }
+            else
+            {
+                SubmitPoll();
+            }
         }
 
         function SubmitPoll() {
@@ -605,6 +669,31 @@
                             b("YTChatDocument").contentWindow.postMessage("Stop_Poll", "*");
                         }
                     });
+                    socket_space.on('channel.channel_points_custom_reward_redemption.add', (msg) => {
+                        let { metadata, payload } = msg;
+                        if (PastMessageIDs.includes(metadata.message_id)) {
+                            console.error("Ignored Add Redemption event due to duplicate message IDs (this is due to Twitch probably re-sending events)");
+                            return;
+                        }
+                        if (GetRedemptionData(payload.event.id) != null) {
+                            console.error("Ignored Add Redemption event due to duplicate redemption IDs (this is due to Twitch probably re-sending events)");
+                            return;
+                        }
+                        AddRedemption(payload.event);
+                    });
+                    socket_space.on('channel.channel_points_custom_reward_redemption.update', (msg) => {
+                        let { metadata, payload } = msg;
+                        let { event } = payload;
+                        if (PastMessageIDs.includes(metadata.message_id)) {
+                            console.error("Ignored Update Status event due to duplicate message IDs (this is due to Twitch probably re-sending events)");
+                            return;
+                        }
+                        if (GetRedemptionData(payload.event.id) == null) {
+                            AddRedemption(payload.event);
+                            return;
+                        }
+                        UpdateRedemption(payload.event);
+                    });
                     if (ENABLE_SPAM_PROTECTION) {
                         socket_space.on('channel.chat.message', (msg) => {
                             let { metadata, payload } = msg;
@@ -623,10 +712,9 @@
                                     LAST_TIME = new Date()
                                     if (SPAM_AMOUNT >= 6) {
                                         SPAM_AMOUNT = 0;
-                                        if (localStorage.getItem('noticed_spam_protection') == null)
-                                        {
+                                        if (localStorage.getItem('noticed_spam_protection') == null) {
                                             localStorage.setItem('noticed_spam_protection', 'true')
-                                            b("SpamProtectionDetailed").style = '';
+                                            //b("SpamProtectionDetailed").style = '';
                                         }
                                         fetch(
                                             'https://api.twitch.tv/helix/moderation/bans?broadcaster_id=' + user_id + "&moderator_id=" + user_id,
@@ -741,6 +829,8 @@
                 'channel.poll.begin': { version: '1', condition: { broadcaster_user_id: user_id } },
                 'channel.poll.progress': { version: '1', condition: { broadcaster_user_id: user_id } },
                 'channel.poll.end': { version: '1', condition: { broadcaster_user_id: user_id } },
+                'channel.channel_points_custom_reward_redemption.add': { version: '1', condition: { broadcaster_user_id: user_id } },
+                'channel.channel_points_custom_reward_redemption.update': { version: '1', condition: { broadcaster_user_id: user_id } }
             }
             if (ENABLE_SPAM_PROTECTION) {
                 topics['channel.ban'] = { version: '1', condition: { broadcaster_user_id: user_id } };
@@ -779,9 +869,8 @@
                             log(`Error with eventsub Call ${type} Call: ${resp.message ? resp.message : ''}`);
                         } else {
                             log(`Created ${type}`);
-                            if (type == "channel.chat.message")
-                            {
-                                b("SpamProtectionDetailed").style = "";
+                            if (type == "channel.channel_points_custom_reward_redemption.add") {
+                                LoadCached();
                             }
                         }
                     })

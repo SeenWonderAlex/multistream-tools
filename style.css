@@ -91,6 +91,12 @@ button {
     background: #b40000;
 }
 
+.SubmitPoll:disabled,
+button:disabled {
+    background: grey;
+    cursor: not-allowed;
+}
+
 .PollQuestion {
     font-size: 18px;
     text-decoration: underline;
@@ -205,4 +211,37 @@ input:checked+.slider:before {
 
 .slider.round:before {
     border-radius: 50%;
+}
+
+.profile {
+    width: 32px;
+    border-radius: 9000px;
+    pointer-events: none;
+}
+
+.text {
+    position: relative;
+    font-size: 16px;
+    bottom: 8px;
+}
+
+.CTitle {
+    position: relative;
+    font-size: 24px;
+    bottom: 16px;
+}
+
+.CImg {
+    width: 56px;
+    pointer-events: none;
+}
+
+.CMsg {
+    font-size: 16px;
+    padding: 0 30px;
+    color: rgb(201, 201, 201);
+}
+
+hr {
+    border-width: 1px;
 }

@@ -9,16 +9,23 @@
 <body>
     <span style="font-size: 30px;">Multistream Tools</span>
     <br>
-    <a style="color: white;">Polls</a>
-    <a id="PollLink" href="./polling.html">Page</a>
-    <a onclick="Popout('PollLink')" href="#popup">Popout</a>
+    <div>
+        <a style="color: white;">Combined Twitch & YouTube Polls</a><br>
+        <hr>
+        <a id="PollLink" href="./polling.html">Visit Page</a><br>
+        <a onclick="Popout('PollLink')" href="#popup">Popout as a Window</a>
+    </div>
+    <br>
+    <div>
+        <a style="color: white;">Monitor Twitch Channel Point Redemptions</a><br>
+        <hr>
+        <a id="PollLink2" href="./ttv-redemptions.html">Visit Page</a><br>
+        <a onclick="Popout('PollLink2')" href="#popup">Popout as a Window</a>
+    </div>
     <script type="text/javascript">
         function Popout(ID) {
             window.open(document.getElementById(ID).href, "_blank", "popup=yes");
         }
-        setTimeout(() => {
-            document.getElementsByTagName('div')[0].style.opacity = 0;
-        }, 250) // In order to fix.
     </script>
 </body>
 
