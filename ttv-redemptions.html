@@ -166,11 +166,11 @@
             console.log(Message);
         }
         function GetRewardData(ID) {
-            rewards.forEach(element => {
-                if (element.id == ID) {
-                    return element;
+            for (var i = 0; i < rewards.length; i++) {
+                if (rewards[i].id == ID) {
+                    return rewards[i];
                 }
-            });
+            }
             return null;
         }
         function GetRedemptionData(ID) {
@@ -266,13 +266,41 @@
                 }
             )
         }
+        function UpdateTimes() {
+            if (document.hidden) return;
+            redemptions.forEach((ele, i, arr) => {
+                if (document.getElementById("RMP_" + ele.id) != null) {
+                    if (ele.time_str1 != timeSinceF(new Date(ele.redeemed_at))) {
+                        ele.time_str1 = timeSinceF(new Date(ele.redeemed_at));
+                        document.getElementById("RMP_" + ele.id).querySelector('a').innerText = " " + ele.time_str1;
+                    }
+                    if (ele.reviewed_at) {
+                        if (ele.time_str2 != timeSinceShort(new Date(ele.reviewed_at))) {
+                            ele.time_str2 = timeSinceShort(new Date(ele.reviewed_at));
+                            document.getElementById("RMP_" + ele.id).querySelectorAll('a')[1].innerText = " (" + ele.time_str2 + " ago)";
+                        }
+                    }
+                }
+            })
+        }
+
         function AddRedemption(data) {
+            if (!data.reviewed_at) {
+                if (data.status != "unfulfilled") {
+                    data.reviewed_at = new Date().toString();
+                }
+            }
             redemptions.unshift(data);
             SaveCached();
             AddElement(data, null, true);
         }
 
         function UpdateRedemption(data) {
+            if (!data.reviewed_at) {
+                if (data.status != "unfulfilled") {
+                    data.reviewed_at = new Date().toString();
+                }
+            }
             var A = -1;
             for (var i = 0; i < redemptions.length; i++) {
                 if (redemptions[i].id == data.id) {
@@ -352,6 +380,15 @@
             timeSince.style = "position: relative; bottom: 16px";
             timeSince.innerHTML = " " + timeSinceF(new Date(data.redeemed_at));
             container.appendChild(timeSince);
+
+            if (data.reviewed_at) {
+                let reviewedSince = document.createElement('a');
+                let STYLE = "position: relative; bottom: 16px; ";
+                if (data.status == "canceled") { STYLE += "color: red;"; } else { STYLE += "color: green;"; }
+                reviewedSince.style = STYLE;
+                reviewedSince.innerHTML = " (" + timeSinceShort(new Date(data.reviewed_at)) + " ago)";
+                container.appendChild(reviewedSince);
+            }
 
             container.appendChild(document.createElement('br'));
 
@@ -495,6 +532,34 @@
             }
             return Math.floor(seconds) + " seconds ago";
         }
+
+        function timeSinceShort(date) {
+
+            var seconds = Math.floor((new Date() - date) / 1000);
+
+            var interval = seconds / 31536000;
+
+            if (interval > 1) {
+                return Math.floor(interval) + "y";
+            }
+            interval = seconds / 2592000;
+            if (interval > 1) {
+                return Math.floor(interval) + "mon";
+            }
+            interval = seconds / 86400;
+            if (interval > 1) {
+                return Math.floor(interval) + "d";
+            }
+            interval = seconds / 3600;
+            if (interval > 1) {
+                return Math.floor(interval) + "h";
+            }
+            interval = seconds / 60;
+            if (interval > 1) {
+                return Math.floor(interval) + "m";
+            }
+            return Math.floor(seconds) + "s";
+        }
         function LoadCached() {
             if (localStorage.getItem("cached") != null) {
                 redemptions = [];
@@ -529,6 +594,8 @@
                 processToken(localStorage.getItem('saved_access_tokenv2'));
             }
         }
+
+        var IntervalID_ = -1;
         function requestHooks(user_id) {
             let topics = {
                 'channel.channel_points_custom_reward_redemption.add': { version: '1', condition: { broadcaster_user_id: user_id } },
@@ -606,6 +673,16 @@
                         user_id = resp.data[0].id;
                         requestHooks(resp.data[0].id);
                         LoadRewards();
+                        IntervalID_ = setInterval(UpdateTimes, 1000);
+                        document.addEventListener('visibilitychange', () => {
+                            if (document.hidden) { // Document got hidden, we clear it out to save memory.
+                                clearInterval(IntervalID_);
+                            }
+                            else {
+                                UpdateTimes();
+                                IntervalID_ = setInterval(UpdateTimes, 1000);
+                            }
+                        })
                     });
 
                     socket_space.on('session_keepalive', () => {

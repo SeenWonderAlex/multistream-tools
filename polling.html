@@ -146,7 +146,7 @@
     </div>
 
     <div id="PleaseWait" style="display: none;">
-        <span class="PleaseWait Ellipsis">Checking for active polls...</span>
+        <span class="PleaseWait">Checking for active polls</span>
     </div>
 
     <div id="PollWarning" style="display: none;">
@@ -310,8 +310,7 @@
             if (PE_Q == "Vote..." && PE_O[0] == "Yes" && PE_O[1] == "No") {
                 b("yes_or_no_confirmation").open = true;
             }
-            else
-            {
+            else {
                 SubmitPoll();
             }
         }
@@ -358,13 +357,13 @@
                     console.log(err);
                     log(`Error with Polls Call Call: ${err.message ? err.message : ''}`);
                 });
-            SetPleaseWait("Waiting for YouTube & Twitch...");
+            SetPleaseWait("Waiting for YouTube & Twitch");
             var CheckForPolls = setInterval(() => {
                 if (ConnectedPollID == "NONE" && ConnectedYTPoll == "CURRENTLY_ACTIVE") {
-                    SetPleaseWait("Waiting for Twitch...");
+                    SetPleaseWait("Waiting for Twitch");
                 }
                 if (ConnectedPollID != "NONE" && ConnectedYTPoll == "NONE") {
-                    SetPleaseWait("Waiting for YouTube...");
+                    SetPleaseWait("Waiting for YouTube");
                 }
                 if (ConnectedPollID != "NONE" && ConnectedYTPoll == "CURRENTLY_ACTIVE") {
                     clearInterval(CheckForPolls);
@@ -493,13 +492,13 @@
             }
             b("CurrentPoll").style = "display: none;";
             b("PollWarning").style = "display: none;";
-            SetPleaseWait("Ending YouTube & Twitch polls...");
+            SetPleaseWait("Ending YouTube & Twitch polls");
             var CheckForPolls = setInterval(() => {
                 if (ConnectedPollID == "NONE" && ConnectedYTPoll != "NONE") {
-                    SetPleaseWait("Ending YouTube poll...");
+                    SetPleaseWait("Ending YouTube poll");
                 }
                 if (ConnectedPollID != "NONE" && ConnectedYTPoll == "NONE") {
-                    SetPleaseWait("Ending Twitch poll...");
+                    SetPleaseWait("Ending Twitch poll");
                 }
                 if (ConnectedPollID == "NONE" && ConnectedYTPoll == "NONE") {
                     clearInterval(CheckForPolls);
@@ -573,20 +572,20 @@
                     localStorage.setItem("saved_access_tokenv2", token);
                     document.getElementById("AuthRequired").style = 'display: none;';
                     b("TwitchChatDummyDoc").src = "https://www.twitch.tv/embed/" + resp.data[0].login + "/chat?parent=seenwonderalex.github.io"
-                    SetPleaseWait("Waiting for YouTube & Twitch...");
+                    SetPleaseWait("Waiting for YouTube & Twitch");
                     var CheckForPolls = setInterval(() => {
                         if (b("TwitchChatDummyDoc").src == "about:blank" || b("YTChatDocument").src == "about:blank") {
-                            SetPleaseWait("Waiting for " + ((b("TwitchChatDummyDoc").src == "about:blank" && b("YTChatDocument").src == "about:blank") ? "YouTube & Twitch..." : ((b("YTChatDocument").src == "about:blank") ? "YouTube..." : "Twitch...")));
+                            SetPleaseWait("Waiting for " + ((b("TwitchChatDummyDoc").src == "about:blank" && b("YTChatDocument").src == "about:blank") ? "YouTube & Twitch" : ((b("YTChatDocument").src == "about:blank") ? "YouTube" : "Twitch")));
                             return;
                         }
                         if (ConnectedPollID.length <= 0 && ConnectedYTPoll.length <= 0) {
-                            SetPleaseWait("Checking active polls for YouTube & Twitch...");
+                            SetPleaseWait("Checking active polls for YouTube & Twitch");
                         }
                         if (ConnectedPollID.length > 0 && ConnectedYTPoll.length <= 0) {
-                            SetPleaseWait("Checking active polls for YouTube...");
+                            SetPleaseWait("Checking active polls for YouTube");
                         }
                         if (ConnectedPollID.length <= 0 && ConnectedYTPoll.length > 0) {
-                            SetPleaseWait("Checking active polls for Twitch...");
+                            SetPleaseWait("Checking active polls for Twitch");
                         }
                         if (ConnectedPollID.length > 0 && ConnectedYTPoll.length > 0) {
                             clearInterval(CheckForPolls);
@@ -951,9 +950,14 @@
 
         var PleaseWaitInterval = -1;
 
-        function SetPleaseWait(Text) {
-            b("PleaseWait").style = ""
-            getElementClass("PleaseWait").innerText = Text;
+        var PWText = "";
+        var PleaseWaitText = document.getElementsByClassName('PleaseWait')[0];
+
+        function SetPleaseWait(TextToInput) {
+            b('PleaseWait').style = "";
+            if (PWText == TextToInput) return;
+            PWText = TextToInput;
+            PleaseWaitText.innerText = TextToInput + EllipsisText[Ellipsis];
             if (PleaseWaitInterval == -1) {
                 PleaseWaitInterval = setInterval(() => {
                     if (Ellipsis < 3) {
@@ -963,11 +967,9 @@
                         Ellipsis = 0;
                     }
                     if (b('PleaseWait').style.display == "none") { clearInterval(PleaseWaitInterval); PleaseWaitInterval = -1; }
-                    let Classes = document.getElementsByClassName('Ellipsis');
-                    for (var i = 0; i < Classes.length; i++) {
-                        Classes[i].innerText = Classes[i].innerText.replaceAll(".", "") + EllipsisText[Ellipsis];
-                    }
-                }, 500)
+                    if (document.hidden) return;
+                    PleaseWaitText.innerText = PWText + EllipsisText[Ellipsis];
+                }, 200)
             }
         }
 
