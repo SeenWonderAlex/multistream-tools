@@ -282,11 +282,21 @@
         }
 
         function AddRedemption(data) {
+            if (!data.reviewed_at) {
+                if (data.status != "unfulfilled") {
+                    data.reviewed_at = new Date().toString();
+                }
+            }
             redemptions.unshift(data);
             SaveCached();
         }
 
         function UpdateRedemption(data) {
+            if (!data.reviewed_at) {
+                if (data.status != "unfulfilled") {
+                    data.reviewed_at = new Date().toString();
+                }
+            }
             var A = -1;
             for (var i = 0; i < redemptions.length; i++) {
                 if (redemptions[i].id == data.id) {
