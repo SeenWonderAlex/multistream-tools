@@ -84,10 +84,11 @@
 </head>
 
 <body>
-    <ul id="AuthRequired">
-        <li>
-            <a href="" id="authorize">Twitch Authorization Required - Authorize</a>
-        </li>
+    <ul id="AuthRequired" style="display: none;">
+        <img src="./cdn/HmmNotes-On_a_stack-7tv.gif">
+        <span>Let's get you to authorize this website! We'll ask you to approve some permissions as well the app itself.
+            You can always revoke our permissions later in your Twitch settings.</span>
+        <button id="authorize">Authorize Twitch</button>
     </ul>
     <div></div>
     <div id="Dropdowns">
@@ -128,7 +129,7 @@
     <script type="text/javascript">
         // These are set for the GitHub Pages Example
         // Substitute as needed
-        var client_id = '0rtnqz2s8exi6oyzccn857h6jntgyp';
+        var client_id = 'siayiyd16jh90e3j473ckuu2seoq0p';
         var redirect = window.location;
         var access_token = '';
         var socket_space = '';
@@ -158,7 +159,7 @@
             return document.getElementById(Id);
         }
 
-        document.getElementById('authorize').setAttribute('href', 'https://id.twitch.tv/oauth2/authorize?client_id=' + client_id + '&redirect_uri=' + encodeURIComponent(redirect) + '&response_type=token&scope=chat:read+channel:moderate+moderation:read+channel:read:redemptions+channel:manage:polls+channel:read:polls+moderator:read:chat_settings');
+        document.getElementById('authorize').onclick = (ev) => { location.href = 'https://id.twitch.tv/oauth2/authorize?client_id=' + client_id + '&redirect_uri=' + encodeURIComponent(redirect) + '&response_type=token&scope=chat:read+channel:moderate+moderation:read+channel:read:redemptions+channel:manage:polls+channel:read:polls+moderator:read:chat_settings' };
         document.addEventListener('DOMContentLoaded', () => {
             handleSavedToken();
         });
@@ -590,8 +591,26 @@
             if (myParam != null) {
                 processToken(myParam);
             }
-            else if (localStorage.getItem('saved_access_tokenv2') != null) {
-                processToken(localStorage.getItem('saved_access_tokenv2'));
+            else if (localStorage.getItem('saved_access_token') != null) {
+                processToken(localStorage.getItem('saved_access_token'));
+            }
+            else {
+                const queryParams = new URLSearchParams(window.location.search);
+                const error = queryParams.get('error');
+                if (error != null) {
+                    b("AuthRequired").className = "Oops";
+                    b("AuthRequired").getElementsByTagName('img')[0].src = './cdn/Weirdge-perry8782-7tv.gif';
+                    let Text = "We could not complete the authentication of your Twitch account: " + queryParams.get('error_description');
+                    if (error == "access_denied") {
+                        Text = "Don't like the permissions we have? No worries. Contact SeenWonderAlex and he'll give you permissions you need.";
+                    }
+                    else if (error == "redirect_mismatch") {
+                        Text = "Are you in the right page? We are unable to complete this process. Feel free to try again or reopen this page from the source.";
+                    }
+                    b("AuthRequired").getElementsByTagName('span')[0].innerText = Text;
+                    b("authorize").innerText = "Reauthorize Twitch";
+                }
+                document.getElementById("AuthRequired").style = '';
             }
         }
 
@@ -663,8 +682,8 @@
                         return Promise.reject(resp.error + ": " + resp.message);
                     }
                     if (window.location.hash.length > 0) window.location.hash = "#authorized";
-                    localStorage.setItem("saved_access_tokenv2", token);
-                    document.getElementById("AuthRequired").style = 'display: none;';
+                    localStorage.setItem("saved_access_token", token);
+                    document.getElementById("AuthRequired").remove();
                     socket_space = new initSocket(true);
                     // and build schnanaigans
                     socket_space.on('connected', (id) => {
@@ -718,7 +737,12 @@
                 .catch(err => {
                     console.error(err);
                     log('Error with Users Call');
-                    localStorage.removeItem("saved_access_tokenv2");
+                    localStorage.removeItem("saved_access_token");
+                    document.getElementById("AuthRequired").style = '';
+                    b("AuthRequired").className = "Oops";
+                    b("AuthRequired").getElementsByTagName('img')[0].src = './cdn/Weirdge-perry8782-7tv.gif';
+                    b("AuthRequired").getElementsByTagName('span')[0].innerText = "We could not access your Twitch account anymore. " + err;
+                    b("authorize").innerText = "Reauthorize Twitch";
                 });
         }
     </script>

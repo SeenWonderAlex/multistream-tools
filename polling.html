@@ -84,14 +84,11 @@
 </head>
 
 <body>
-    <ul id="AuthRequired">
-        <li>
-            <a href="" id="authorize">Twitch Authorization Required - Authorize</a>
-            <!-- <button onclick="openDetails()" style="width: 160px; height: 30px">What is it?</button>
-            <br>
-            Don't like that troll feature? 
-            <a href="" id="authorize_backup">Click to Authorize Normally</a> -->
-        </li>
+    <ul id="AuthRequired" style="display: none;">
+        <img src="./cdn/HmmNotes-On_a_stack-7tv.gif">
+        <span>Let's get you to authorize this website! We'll ask you to approve some permissions as well the app itself.
+            You can always revoke our permissions later in your Twitch settings.</span>
+        <button id="authorize">Authorize Twitch</button>
     </ul>
 
     <dialog id="yes_or_no_confirmation">
@@ -112,6 +109,7 @@
         <br>
         <input id="YouTubeURL" class="YU1" type="url">
         <button onclick="LoadURL();" class="YU2">Load</button>
+        <button onclick="YoutubeLinkHandler();" id="YUHandler" class="YU2 YU3">Load from Recent</button>
     </details>
 
     <iframe id="TwitchChatDummyDoc" src="about:blank" height="450"
@@ -197,8 +195,8 @@
     <script type="text/javascript">
         // These are set for the GitHub Pages Example
         // Substitute as needed
-        var client_id = '0rtnqz2s8exi6oyzccn857h6jntgyp';
-        var redirect = window.location;
+        var client_id = 'siayiyd16jh90e3j473ckuu2seoq0p';
+        var redirect = (() => { let str = window.location.href; if (str.includes('?')) { str = str.split('?')[0]; } if (str.includes('#')) { str = str.split('#')[0]; } return str; })();
         var access_token = '';
         var socket_space = '';
         var session_id = '';
@@ -207,9 +205,8 @@
         var ConnectedPollID = '';
         var ConnectedYTPoll = '';
 
-        const ENABLE_SPAM_PROTECTION = false;
-        let SPAM_PROTECTION_CHECKED = true;
-        const USER_SPAM_TARGET = "killalalas_";
+        // const ENABLE_SPAM_PROTECTION = false;
+        // let SPAM_PROTECTION_CHECKED = true;
 
         // Ellipsis Check
         var Ellipsis = 0;
@@ -217,24 +214,99 @@
         const EllipsisText = ["", ".", "..", "..."]
 
         // document.getElementById('authorize').setAttribute('href', 'https://id.twitch.tv/oauth2/authorize?client_id=' + client_id + '&redirect_uri=' + encodeURIComponent(redirect) + '&response_type=token&scope=user:read:chat+channel:moderate+moderator:manage:banned_users+channel:manage:moderators+moderation:read+channel:read:redemptions+channel:manage:polls+channel:read:polls+moderator:read:chat_settings');
-        document.getElementById('authorize').setAttribute('href', 'https://id.twitch.tv/oauth2/authorize?client_id=' + client_id + '&redirect_uri=' + encodeURIComponent(redirect) + '&response_type=token&scope=chat:read+channel:moderate+moderation:read+channel:read:redemptions+channel:manage:polls+channel:read:polls+moderator:read:chat_settings');
+        document.getElementById('authorize').onclick = (ev) => { location.href = 'https://id.twitch.tv/oauth2/authorize?client_id=' + client_id + '&redirect_uri=' + encodeURIComponent(redirect) + '&response_type=token&scope=chat:read+channel:moderate+moderation:read+channel:read:redemptions+channel:manage:polls+channel:read:polls+moderator:read:chat_settings&state=ttv3e43v1' };
         document.addEventListener('DOMContentLoaded', () => {
             handleSavedToken();
         });
         function handleSavedToken() {
             const urlParams = new URLSearchParams(window.location.hash.replace('#', '?'));
             const myParam = urlParams.get('access_token');
-            if (myParam != null) {
+            const isTwitch = urlParams.get('state') == "ttv3e43v1";
+            const isYouTube = urlParams.get('state') == "yt35hv1";
+            if (myParam != null && isTwitch) {
                 processToken(myParam);
             }
-            else if (localStorage.getItem('saved_access_tokenv2') != null) {
-                processToken(localStorage.getItem('saved_access_tokenv2'));
+            else if (localStorage.getItem('saved_access_token') != null) {
+                processToken(localStorage.getItem('saved_access_token'));
+            }
+            else {
+                const queryParams = new URLSearchParams(window.location.search);
+                const error = queryParams.get('error');
+                if (error != null) {
+                    b("AuthRequired").className = "Oops";
+                    b("AuthRequired").getElementsByTagName('img')[0].src = './cdn/Weirdge-perry8782-7tv.gif';
+                    let Text = "We could not complete the authentication of your Twitch account: " + queryParams.get('error_description');
+                    if (error == "access_denied") {
+                        Text = "Don't like the permissions we have? No worries. Contact SeenWonderAlex and he'll give you permissions you need.";
+                    }
+                    else if (error == "redirect_mismatch") {
+                        Text = "Are you in the right page? We are unable to complete this process. Feel free to try again or reopen this page from the source.";
+                    }
+                    b("AuthRequired").getElementsByTagName('span')[0].innerText = Text;
+                    b("authorize").innerText = "Reauthorize Twitch";
+                }
+                document.getElementById("AuthRequired").style = '';
+            }
+
+            if (myParam != null && isYouTube) {
+                verifyYTToken(myParam);
+            }
+            else if (localStorage.getItem('ytsavedtoken') != null) {
+                verifyYTToken(localStorage.getItem('ytsavedtoken'));
+            }
+            else {
+                b('YUHandler').innerText = "Load from Recent (authorization required)";
+                b('YUHandler').setAttribute('onclick', "YoutubeLinkHandler();")
             }
 
             if (localStorage.getItem('saved_url') != null && localStorage.getItem('saved_url').length > 0) {
                 b("YouTubeURL").value = localStorage.getItem('saved_url');
-                LoadURL(localStorage.getItem('saved_url'));
+                LoadURL();
             }
+        }
+
+        function verifyYTToken(token) {
+            fetch('https://www.googleapis.com/youtube/v3/channels?part=snippet&mine=true&access_token=' + token)
+                .then(async result => {
+                    if (!result.ok) return Promise.reject(await result.json());
+                    b('YUHandler').removeAttribute('onclick');
+                    b('YUHandler').onclick = async (ev) => {
+                        b('YUHandler').disabled = true;
+                        b('YUHandler').innerText = "Checking Your Streams";
+                        try {
+                            let result = await fetch('https://youtube.googleapis.com/youtube/v3/liveBroadcasts?part=id&broadcastType=all&maxResults=1&mine=true', {
+                                "headers": {
+                                    "Authorization": "Bearer " + token,
+                                    "Accept": "application/json"
+                                }
+                            });
+                            let json = await result.json();
+                            if (json.pageInfo.totalResults <= 0) {
+                                b('YUHandler').disabled = false;
+                                b('YUHandler').innerText = "NO STREAMS FOUND!";
+                                setTimeout(() => { b('YUHandler').innerText = "Load from Recent"; }, 3000);
+                            }
+                            else {
+                                b('YUHandler').disabled = false;
+                                b('YUHandler').innerText = "Load from Recent";
+                                b("YouTubeURL").value = 'https://youtube.com/live/' + json.items[0].id;
+                                LoadURL();
+                            }
+                        } catch (error) {
+                            console.error(error);
+                            b('YUHandler').disabled = false;
+                            b('YUHandler').innerText = "AN INTERNAL ERROR OCCURRED!";
+                            setTimeout(() => { b('YUHandler').innerText = "Load from Recent"; }, 3000);
+                        }
+                    };
+                    localStorage.setItem('ytsavedtoken', token);
+                })
+                .catch(err => {
+                    console.error("YouTube Authentication Failed: " + err);
+                    localStorage.removeItem('ytsavedtoken');
+                    b('YUHandler').innerText = "Load from Recent (authorization required)";
+                    b('YUHandler').setAttribute('onclick', "YoutubeLinkHandler();")
+                });
         }
 
         // function openDetails()
@@ -397,9 +469,12 @@
             localStorage.setItem("saved_url", URL);
             var regExp = /.*(?:youtu.be\/|v\/|u\/\w\/|live\/|watch\?v=)([^#\&\?]*).*/;
             try {
-                b("YTChatDocument").src = "https://youtube.com/live_chat?v=" + (URL.match(regExp)[1] ?? "none") + "&embed_domain=seenwonderalex.github.io";
+                b("YTChatDocument").src = "https://youtube.com/live_chat?v=" + (URL.match(regExp)[1] ?? "none") + "&embed_domain=" + location.hostname;
                 let OldText = b("YouTubeConnection").querySelector("span").innerText;
                 if (!OldText.includes("invalid") && !OldText.includes("load")) {
+                    if (IntervalID == 0) {
+                        IntervalID = setInterval(PingFrame, 1000);
+                    }
                     b("YouTubeConnection").querySelector("span").innerText = "YouTube Chat successfully loaded!";
                     b("YouTubeConnection").querySelector("span").style.color = "green";
                     setTimeout(() => {
@@ -518,8 +593,6 @@
             }, 250);
         }
 
-        IntervalID = setInterval(PingFrame, 1000);
-
         function processToken(token) {
             access_token = token;
             window.addEventListener("message", (ev) => {
@@ -528,6 +601,7 @@
                 }
                 if (ev.data.MessageType == "Pong") {
                     clearInterval(IntervalID);
+                    IntervalID = 0;
                 }
                 if (ev.data.MessageType == "OptionsAvailable") {
                     console.log("[YT Poll] No poll is currently active.")
@@ -559,28 +633,8 @@
                         return Promise.reject(resp.error + ": " + resp.message);
                     }
                     if (window.location.hash.length > 0) window.location.hash = "#authorized";
-                    if (ENABLE_SPAM_PROTECTION) {
-                        if (localStorage.getItem('noticed_spam_protection') != null) {
-                            let SAVED = localStorage.getItem('noticed_spam_protection') == "true";
-                            SPAM_PROTECTION_CHECKED = SAVED;
-                            b("ModSpamProtection").checked = SAVED;
-                        }
-                        b("ModSpamProtection").addEventListener('change', function () {
-                            if (b("ModSpamProtection").checked) {
-                                // do this
-                                console.log('Checked');
-                                localStorage.setItem('noticed_spam_protection', 'true')
-                                SPAM_PROTECTION_CHECKED = true;
-                            } else {
-                                // do that
-                                console.log('Not checked');
-                                localStorage.setItem('noticed_spam_protection', 'false')
-                                SPAM_PROTECTION_CHECKED = false;
-                            }
-                        });
-                    }
-                    localStorage.setItem("saved_access_tokenv2", token);
-                    document.getElementById("AuthRequired").style = 'display: none;';
+                    localStorage.setItem("saved_access_token", token);
+                    document.getElementById("AuthRequired").remove();
                     b("TwitchChatDummyDoc").src = "https://www.twitch.tv/embed/" + resp.data[0].login + "/chat?parent=seenwonderalex.github.io"
                     SetPleaseWait("Waiting for YouTube & Twitch");
                     var CheckForPolls = setInterval(() => {
@@ -703,101 +757,16 @@
                         }
                         UpdateRedemption(payload.event);
                     });
-                    if (ENABLE_SPAM_PROTECTION) {
-                        socket_space.on('channel.chat.message', (msg) => {
-                            let { metadata, payload } = msg;
-                            let { event } = payload;
-                            if (PastMessageIDs.includes(metadata.message_id)) {
-                                return;
-                            }
-                            PastMessageIDs.push(metadata.message_id);
-                            if (event.chatter_user_login == USER_SPAM_TARGET && SPAM_PROTECTION_CHECKED) {
-                                if (((new Date().getTime() - LAST_TIME.getTime()) / 1000) >= 5) {
-                                    SPAM_AMOUNT = 0;
-                                    LAST_TIME = new Date()
-                                }
-                                else {
-                                    SPAM_AMOUNT++;
-                                    LAST_TIME = new Date()
-                                    if (SPAM_AMOUNT >= 6) {
-                                        SPAM_AMOUNT = 0;
-                                        if (localStorage.getItem('noticed_spam_protection') == null) {
-                                            localStorage.setItem('noticed_spam_protection', 'true')
-                                            //b("SpamProtectionDetailed").style = '';
-                                        }
-                                        fetch(
-                                            'https://api.twitch.tv/helix/moderation/bans?broadcaster_id=' + user_id + "&moderator_id=" + user_id,
-                                            {
-                                                "method": "POST",
-                                                "headers": {
-                                                    "Client-ID": client_id,
-                                                    "Authorization": "Bearer " + access_token,
-                                                    'Content-Type': 'application/json'
-                                                },
-                                                "body": JSON.stringify({
-                                                    "data": {
-                                                        "user_id": event.chatter_user_id,
-                                                        "duration": 10,
-                                                        "reason": "Spam protection!"
-                                                    }
-                                                })
-                                            }
-                                        )
-                                            .then(resp => resp.json())
-                                            .then(resp => {
-                                                console.log(resp);
-                                                if (resp.error != undefined) {
-                                                    return Promise.reject(resp.error + ": " + resp.message);
-                                                }
-                                                log(`Successfully timed out ${event.chatter_user_name}`);
-                                            })
-                                            .catch(err => {
-                                                console.log(err);
-                                                log(`Error with timing out ${type}: ${err.message ? err.message : ''}`);
-                                            });
-                                    }
-                                }
-                            }
-                        });
-                        socket_space.on('channel.ban', (msg) => {
-                            let { metadata, payload } = msg;
-                            let { event } = payload;
-                            if (PastMessageIDs.includes(metadata.message_id)) {
-                                return;
-                            }
-                            PastMessageIDs.push(metadata.message_id);
-                            if (!event.is_permanent && event.user_login == USER_SPAM_TARGET) {
-                                setTimeout(() => {
-                                    fetch(
-                                        'https://api.twitch.tv/helix/moderation/moderators?broadcaster_id=' + user_id + "&user_id=" + event.user_id,
-                                        {
-                                            "method": "POST",
-                                            "headers": {
-                                                "Client-ID": client_id,
-                                                "Authorization": "Bearer " + access_token
-                                            }
-                                        }
-                                    )
-                                        .then(resp => {
-                                            if (resp.ok) {
-                                                log(`Successfully remodded ${event.user_name}`);
-                                            } else {
-                                                log(`Failed to remod ${event.user_name} for status ${resp.status}`);
-                                            }
-                                        })
-                                        .catch(err => {
-                                            console.log(err);
-                                            log(`Error with remodding user: ${err.message ? err.message : ''}`);
-                                        });
-                                }, new Date(event.ends_at).getTime() - new Date(event.banned_at).getTime() + 250)
-                            }
-                        });
-                    }
                 })
                 .catch(err => {
                     console.error(err);
                     log('Error with Users Call');
-                    localStorage.removeItem("saved_access_tokenv2");
+                    localStorage.removeItem("saved_access_token");
+                    document.getElementById("AuthRequired").style = '';
+                    b("AuthRequired").className = "Oops";
+                    b("AuthRequired").getElementsByTagName('img')[0].src = './cdn/Weirdge-perry8782-7tv.gif';
+                    b("AuthRequired").getElementsByTagName('span')[0].innerText = "We could not access your Twitch account anymore. " + err;
+                    b("authorize").innerText = "Reauthorize Twitch";
                 });
         }
 
@@ -833,6 +802,39 @@
             console.log(Message);
         }
 
+        function YoutubeLinkHandler() {
+            // Google's OAuth 2.0 endpoint for requesting an access token
+            var oauth2Endpoint = 'https://accounts.google.com/o/oauth2/v2/auth';
+
+            // Create <form> element to submit parameters to OAuth 2.0 endpoint.
+            var form = document.createElement('form');
+            form.setAttribute('method', 'GET'); // Send as a GET request.
+            form.setAttribute('action', oauth2Endpoint);
+
+            // Parameters to pass to OAuth 2.0 endpoint.
+            var params = {
+                'client_id': '597860444523-l87m271jorgmc0a9ea2vnn4ohqkmjphi.apps.googleusercontent.com',
+                'redirect_uri': (() => { let str = window.location.href; if (str.includes('?')) { str = str.split('?')[0]; } if (str.includes('#')) { str = str.split('#')[0]; } return str; })(),
+                'response_type': 'token',
+                'scope': 'https://www.googleapis.com/auth/youtube.readonly',
+                'include_granted_scopes': 'true',
+                'state': 'yt35hv1'
+            };
+
+            // Add form parameters as hidden input values.
+            for (var p in params) {
+                var input = document.createElement('input');
+                input.setAttribute('type', 'hidden');
+                input.setAttribute('name', p);
+                input.setAttribute('value', params[p]);
+                form.appendChild(input);
+            }
+
+            // Add form to page and submit it to open the OAuth 2.0 endpoint.
+            document.body.appendChild(form);
+            form.submit();
+        }
+
         function requestHooks(user_id) {
             let topics = {
                 'channel.poll.begin': { version: '1', condition: { broadcaster_user_id: user_id } },
@@ -841,10 +843,10 @@
                 'channel.channel_points_custom_reward_redemption.add': { version: '1', condition: { broadcaster_user_id: user_id } },
                 'channel.channel_points_custom_reward_redemption.update': { version: '1', condition: { broadcaster_user_id: user_id } }
             }
-            if (ENABLE_SPAM_PROTECTION) {
-                topics['channel.ban'] = { version: '1', condition: { broadcaster_user_id: user_id } };
-                topics['channel.chat.message'] = { version: '1', condition: { broadcaster_user_id: user_id, user_id: user_id } };
-            }
+            // if (ENABLE_SPAM_PROTECTION) {
+            //     topics['channel.ban'] = { version: '1', condition: { broadcaster_user_id: user_id } };
+            //     topics['channel.chat.message'] = { version: '1', condition: { broadcaster_user_id: user_id, user_id: user_id } };
+            // }
 
             log(`Spawn Topics for ${user_id}`);
 
