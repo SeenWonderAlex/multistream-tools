@@ -1,9 +1,9 @@
 <html>
 
 <head>
-    <title>Multistreaming Tools - Polling</title>
+    <title>Multistream Tools - Polling</title>
     <link rel="stylesheet" href="./style.css" />
-    <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
     <style>
         #log {
             box-sizing: border-box;
@@ -176,9 +176,41 @@
         <span class="PollQuestion" id="Res_PollQuestion">Poll Question</span>
         <span class="PollQuestionInfo" id="Res_PollQuestionInfo"> (0 Votes)</span>
         <p id="Res_PollOption1" class="PollOption">0%</p>
+        <div class="PollProgress" style="display: none;">
+            <div id="RPOpt1_TTV" class="PollProgressBarResult"
+                style="border-top-left-radius: 25px; border-bottom-left-radius: 25px; width: 0%; background-color: rgb(96, 53, 197);">
+            </div>
+            <div id="RPOpt1_YT" class="PollProgressBarResult"
+                style="border-top-right-radius: 25px; border-bottom-right-radius: 25px; width: 0%; background-color: rgb(222, 46, 46);">
+            </div>
+        </div>
         <p id="Res_PollOption2" class="PollOption">0%</p>
+        <div class="PollProgress" style="display: none;">
+            <div id="RPOpt2_TTV" class="PollProgressBarResult"
+                style="border-top-left-radius: 25px; border-bottom-left-radius: 25px; width: 0%; background-color: rgb(96, 53, 197);">
+            </div>
+            <div id="RPOpt2_YT" class="PollProgressBarResult"
+                style="border-top-right-radius: 25px; border-bottom-right-radius: 25px; width: 0%; background-color: rgb(222, 46, 46);">
+            </div>
+        </div>
         <p id="Res_PollOption3" class="PollOption">0%</p>
+        <div class="PollProgress" style="display: none;">
+            <div id="RPOpt3_TTV" class="PollProgressBarResult"
+                style="border-top-left-radius: 25px; border-bottom-left-radius: 25px; width: 0%; background-color: rgb(96, 53, 197);">
+            </div>
+            <div id="RPOpt3_YT" class="PollProgressBarResult"
+                style="border-top-right-radius: 25px; border-bottom-right-radius: 25px; width: 0%; background-color: rgb(222, 46, 46);">
+            </div>
+        </div>
         <p id="Res_PollOption4" class="PollOption">0%</p>
+        <div class="PollProgress" style="display: none;">
+            <div id="RPOpt4_TTV" class="PollProgressBarResult"
+                style="border-top-left-radius: 25px; border-bottom-left-radius: 25px; width: 0%; background-color: rgb(96, 53, 197);">
+            </div>
+            <div id="RPOpt4_YT" class="PollProgressBarResult"
+                style="border-top-right-radius: 25px; border-bottom-right-radius: 25px; width: 0%; background-color: rgb(222, 46, 46);">
+            </div>
+        </div>
     </details>
 
     <!-- <details id="SpamProtectionDetailed" style="display: none;" open>
@@ -697,6 +729,7 @@
                         PollStarttime = new Date(event.started_at);
                         PollEndtime = new Date(event.ends_at);
                         SetTwitchPoll(event, true);
+                        b('PollResultsDiv').open = false;
                     });
                     socket_space.on('channel.poll.progress', (msg) => {
                         let { metadata, payload } = msg;
@@ -778,6 +811,12 @@
             b("Res_PollOption3").style = PE_O[2].length > 0 ? "" : "display: none;";
             b("Res_PollOption4").style = PE_O[3].length > 0 ? "" : "display: none;";
             if ((typeof TwitchPoll === 'object' && TwitchPoll != null) && (typeof YouTubePoll === 'object' && YouTubePoll != null)) {
+                b('PollResultsDiv').open = true;
+                b("RPOpt1_TTV").parentElement.style = "display: flex;";
+                b("RPOpt2_TTV").parentElement.style = "display: flex;";
+                b("RPOpt3_TTV").parentElement.style = PE_O[2].length > 0 ? "display: flex;" : "display: flex; display: none;";
+                b("RPOpt4_TTV").parentElement.style = PE_O[3].length > 0 ? "display: flex;" : "display: flex; display: none;";
+
                 var CombinedVotes = Array((PE_O[2].length > 0 && PE_O[3].length > 0) ? 4 : ((PE_O[2].length > 0 || PE_O[3].length > 0) ? 3 : 2));
                 var TwitchTotalVotes = 0;
                 const YouTubeTotalVotes = YouTubePoll["Total"];
@@ -793,6 +832,27 @@
                 b("Res_PollQuestionInfo").innerText = " (" + CombinedTotal + " Votes) T: " + TwitchTotalVotes + " Y: " + YouTubeTotalVotes;
                 for (let i = 0; i < CombinedVotes.length; i++) {
                     b("Res_PollOption" + (i + 1)).innerText = `${PE_O[i]} / ${Math.round(CombinedVotes[i] / ((CombinedTotal == 0) ? 1 : CombinedTotal) * 100)}% (${CombinedVotes[i]}) T: ${TwitchPoll["votes"][i]} Y: ${YouTubePoll["votes"][i]}`;
+                    if (TwitchPoll["votes"][i] == 0 && YouTubePoll["votes"][i] > 0) {
+                        b('RPOpt' + (i + 1) + "_TTV").style.width = "0%";
+                        b('RPOpt' + (i + 1) + "_YT").style.borderTopLeftRadius = "25px";
+                        b('RPOpt' + (i + 1) + "_YT").style.borderBottomLeftRadius = "25px";
+                        b('RPOpt' + (i + 1) + "_YT").style.width = Math.round((YouTubePoll["votes"][i] / CombinedTotal) * 100) + "%";
+                    }
+                    else if (TwitchPoll["votes"][i] > 0 && YouTubePoll["votes"][i] == 0) {
+                        b('RPOpt' + (i + 1) + "_YT").style.width = "0%";
+                        b('RPOpt' + (i + 1) + "_TTV").style.borderTopRightRadius = "25px";
+                        b('RPOpt' + (i + 1) + "_TTV").style.borderBottomRightRadius = "25px";
+                        b('RPOpt' + (i + 1) + "_TTV").style.width = Math.round((TwitchPoll["votes"][i] / CombinedTotal) * 100) + "%";
+                    }
+                    else
+                    {
+                        b('RPOpt' + (i + 1) + "_YT").style.borderTopLeftRadius = "0";
+                        b('RPOpt' + (i + 1) + "_YT").style.borderBottomLeftRadius = "0";
+                        b('RPOpt' + (i + 1) + "_TTV").style.borderTopRightRadius = "0";
+                        b('RPOpt' + (i + 1) + "_TTV").style.borderBottomRightRadius = "0";
+                        b('RPOpt' + (i + 1) + "_TTV").style.width = Math.round((TwitchPoll["votes"][i] / CombinedTotal) * 100) + "%";
+                        b('RPOpt' + (i + 1) + "_YT").style.width = Math.round((YouTubePoll["votes"][i] / CombinedTotal) * 100) + "%";
+                    }
                 }
                 window.scrollTo(0, document.body.scrollHeight);
             }
