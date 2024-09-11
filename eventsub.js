@@ -204,6 +204,6 @@ function log(msg) {
     sp.textContent = msg;
 }
 
-setTimeout(() => {
-    document.getElementsByTagName('div')[0].style.opacity = 0;
-}, 250) // In order to fix.
+// setTimeout(() => {
+//     document.getElementsByTagName('div')[0].style.opacity = 0;
+// }, 250) // In order to fix.

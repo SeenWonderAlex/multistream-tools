@@ -422,7 +422,7 @@
 
         function CheckPoll() {
             if (PE_Q == "Vote..." && PE_O[0] == "Yes" && PE_O[1] == "No") {
-                b("yes_or_no_confirmation").open = true;
+                b("yes_or_no_confirmation").showModal();
             }
             else {
                 SubmitPoll();

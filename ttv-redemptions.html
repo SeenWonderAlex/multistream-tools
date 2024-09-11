@@ -130,7 +130,7 @@
         // These are set for the GitHub Pages Example
         // Substitute as needed
         var client_id = 'siayiyd16jh90e3j473ckuu2seoq0p';
-        var redirect = window.location;
+        var redirect = (() => { let str = window.location.href; if (str.includes('?')) { str = str.split('?')[0]; } if (str.includes('#')) { str = str.split('#')[0]; } return str; })();
         var access_token = '';
         var socket_space = '';
         var session_id = '';
@@ -562,9 +562,9 @@
             return Math.floor(seconds) + "s";
         }
         function LoadCached() {
-            if (localStorage.getItem("cached") != null) {
+            if (localStorage.getItem("cached" + HasToken) != null) {
                 redemptions = [];
-                var b = (localStorage.getItem("cached")).split("~=~");
+                var b = (localStorage.getItem("cached" + HasToken)).split("~=~");
                 b.forEach(ele => {
                     let a = JSON.parse(ele);
                     let date = new Date(a.redeemed_at);
@@ -583,7 +583,7 @@
             redemptions.forEach(ele => {
                 array.push(JSON.stringify(ele));
             });
-            localStorage.setItem("cached", array.join("~=~"));
+            localStorage.setItem("cached" + HasToken, array.join("~=~"));
         }
         function handleSavedToken() {
             const urlParams = new URLSearchParams(window.location.hash.replace('#', '?'));
@@ -665,6 +665,7 @@
             }
         }
         let PastMessageIDs = [];
+        let HasToken = "";
         function processToken(token) {
             access_token = token;
             fetch(
@@ -682,7 +683,13 @@
                         return Promise.reject(resp.error + ": " + resp.message);
                     }
                     if (window.location.hash.length > 0) window.location.hash = "#authorized";
-                    localStorage.setItem("saved_access_token", token);
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const myParam = urlParams.get('tp');
+                    if (myParam == "true")
+                    {
+                        HasToken = token;
+                    }
+                    else localStorage.setItem("saved_access_token", token);
                     document.getElementById("AuthRequired").remove();
                     socket_space = new initSocket(true);
                     // and build schnanaigans

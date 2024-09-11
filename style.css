@@ -33,12 +33,19 @@
     font-family: Roobert, Inter, "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
-body, input, select, dialog {
+body,
+input,
+select,
+dialog {
     background: rgb(26, 26, 26);
 }
 
 dialog {
-    position: fixed;
+   bottom: 75%;
+}
+
+dialog::backdrop {
+    background-color: rgb(255 0 0 / 25%);
 }
 
 a {
@@ -163,6 +170,7 @@ button:disabled {
 .YU3 {
     background-color: rgb(0, 55, 255);
 }
+
 .YU3:hover {
     background-color: rgb(14, 56, 206);
 }
@@ -271,33 +279,32 @@ hr {
     position: relative;
 }
 
-#AuthRequired
-span {
+#AuthRequired span {
     position: absolute;
     left: 110px;
     font-size: 24px;
 }
-#AuthRequired
-button {
+
+#AuthRequired button {
     position: absolute;
     left: 110px;
     top: 65px;
     width: 92%;
     background-color: rgb(207, 42, 188);
 }
-#AuthRequired
-button:hover {
+
+#AuthRequired button:hover {
     background-color: rgb(199, 34, 179);
 }
 
 #AuthRequired.Oops {
     background-color: rgb(151, 18, 18);
 }
-#AuthRequired.Oops
-button {
+
+#AuthRequired.Oops button {
     background-color: rgb(242, 43, 43);
 }
-#AuthRequired.Oops
-button:hover  {
+
+#AuthRequired.Oops button:hover {
     background-color: rgb(197, 22, 22);
 }

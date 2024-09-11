@@ -1,2 +1,4 @@
 # The Extension source folder. It'll be packaged in a zip instead.
 extension-source/
+twitch-admin/owner-unprotected.html
+twitch-admin/panel-unprotected.html
