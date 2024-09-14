@@ -503,7 +503,7 @@
             try {
                 b("YTChatDocument").src = "https://youtube.com/live_chat?v=" + (URL.match(regExp)[1] ?? "none") + "&embed_domain=" + location.hostname;
                 let OldText = b("YouTubeConnection").querySelector("span").innerHTML;
-                if (!OldText.includes("invalid") && !OldText.includes("load")) {
+                if (!OldText.includes("invalid") && !OldText.includes("loaded")) {
                     if (IntervalID == 0) {
                         IntervalID = setInterval(PingFrame, 1000);
                     }
