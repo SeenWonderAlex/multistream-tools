@@ -1,0 +1,107 @@
+<html>
+
+</html>
+
+<head>
+    <title>Multistream Tools - Download Extension</title>
+    <link rel="stylesheet" href="../style.css" />
+    <link rel="icon" type="image/x-icon" href="../favicon.ico">
+    <style>
+        .footer {
+            position: fixed;
+            bottom: 0;
+            background-color: black;
+            width: 100%;
+            left: 0;
+        }
+
+        p {
+            text-align: center;
+        }
+
+        .CenterImg {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 50%;
+        }
+
+        .CenterText {
+            display: block;
+            text-align: center;
+        }
+
+        .Button {
+            background: #33c34e;
+            cursor: pointer;
+            width: 128px;
+            height: 20px;
+            border-radius: 12px;
+            border-width: 0px;
+            padding: 8px 50px;
+            transition: 0.3s;
+            font-size: 18px;
+            color: white;
+            text-align: center;
+            margin: 0;
+            text-decoration: none;
+        }
+
+        .Button:hover {
+            background: rgb(24, 163, 70)
+        }
+
+        .AlignCenter {
+            align-items: center;
+            justify-content: center;
+            display: flex;
+        }
+    </style>
+</head>
+
+<body>
+    <p style="font-size: 45px;">Download YouTube Compatibility Extension</p>
+    <p>A custom extension is needed for the Combined Polling Tool to work.</p>
+    <div class="AlignCenter">
+        <a class="Button" href="YouTube Compatibility Extension.zip" download="">Download .zip</a>
+    </div>
+    <br>
+    <a class="CenterText" href="#instructions">Download Instructions</a>
+
+    <img src="Preview 3.png" class="CenterImg">
+    <br>
+    <div>
+        <a style="font-weight: 1000;" id="instructions">How to Install This Extension on Chrome?</a><br>
+        <hr>
+        <a style="color: white">If you're lost, try to read this </a><a id="PollLink" target="_blank" href="https://support.google.com/chrome/a/answer/2714278?hl=en#:~:text=Step%202%3A%20Test,or%20extension%20folder.">support page</a><a
+            style="color: white"></a> for instructions</a> <br>
+        <a style="color: white;">1. Download the .zip file. Once downloaded, extract the zip file (do not create a
+            separate folder, there's already a folder inside).</a><br>
+        <a style="color: white;">2. Navigate to chrome://extensions/</a><br>
+        <a style="color: white;">3. Enable Developer Mode</a><br>
+        <a style="color: white;">4. Click Load unpacked and select the extension folder (the one you extracted).</a><br>
+        <a style="color: white;">5. Close the tab. Refresh the Polling tool. You're good to go!</a><br>
+        <br>
+    </div>
+    <br>
+    <div>
+        <a style="color: white; font-weight: 1000;">How does this extension & website works?</a><br>
+        <hr>
+        <a style="color: white">Since there's no official API for YouTube Polls, this extension takes the UI elements from the YouTube chat, reads its needed data, and sends it over to the main website.</a><br>
+        <br>
+        <a style="color: white;">Therefore, the website combines the total votes between two platforms and calculate the combined votes for each choice.</a><br>
+        <br>
+    </div>
+    <br>
+    <br>
+    <script type="text/javascript">
+        function Popout(ID) {
+            window.open(document.getElementById(ID).href, "_blank", "popup=yes");
+        }
+    </script>
+    <div class="footer">
+        <p>Done? Back to <a href="../polling.html">Combined Twitch & YouTube Polls</a></p>
+    </div>
+</body>
+
+</html>
