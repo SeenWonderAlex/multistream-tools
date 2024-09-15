@@ -482,13 +482,18 @@ function eventsub() {
 
         let cells = row.querySelectorAll('td');
 
-        // 2 is the image
-        //cells[2].IMAGE
-        cells[2].textContent = '';
+        // 1 is the image
+        //cells[1].IMAGE
+        cells[1].textContent = '';
         if (image && image.url_1x) {
             let iti = document.createElement('img');
-            cells[2].append(iti);
+            cells[1].append(iti);
             iti.setAttribute('src', image.url_1x);
+        }
+        if (image && image.default_image) {
+            let iti = document.createElement('img');
+            cells[1].append(iti);
+            iti.setAttribute('src', image.default_image.url_1x);
         }
 
         // 3 is the title
@@ -497,18 +502,18 @@ function eventsub() {
             inp.vlaue = title;
         }
         // 4 is the price
-        cells[4].textContent = cost;
+        cells[3].textContent = cost;
         // 5 is enabled 6 is paused
-        colorCell((is_enabled ? 'Enabled' : 'Disabled'), cells[5], is_enabled);
-        colorCell((is_paused ? 'Paused' : 'Running'), cells[6], !is_paused);
-        // 7 skip
-        cells[7].textContent = (should_redemptions_skip_request_queue ? 'Yes' : 'No');
-        // 8 prompt
-        //cells[8].textContent = prompt;
+        colorCell((is_enabled ? 'Enabled' : 'Disabled'), cells[4], is_enabled);
+        colorCell((is_paused ? 'Paused' : 'Running'), cells[5], !is_paused);
+        // 6 skip
+        cells[6].textContent = (should_redemptions_skip_request_queue ? 'Yes' : 'No');
+        // 7 prompt
+        //cells[7].textContent = prompt;
         let promptCell = document.getElementById(`field_${id}_prompt`);
         promptCell.value = prompt;
-        // 9 user input
-        colorCell((is_user_input_required ? '✓' : ''), cells[9], is_user_input_required);
+        // 8 user input
+        colorCell((is_user_input_required ? '✓' : ''), cells[8], is_user_input_required);
 
     });
 
