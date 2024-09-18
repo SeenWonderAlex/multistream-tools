@@ -1,11 +1,10 @@
 <html>
 
-</html>
 <title>Multistream Tools - Twitch Mod Panel</title>
 
 <head>
-    <link rel="stylesheet" href="../style.css" />
     <link rel="icon" type="image/x-icon" href="../favicon.ico">
+    <link rel="stylesheet" href="../style.css" />
     <style>
         .Panel {
             width: 300px;
@@ -865,6 +864,7 @@
                     processToken_forRewards(token);
                     document.querySelector('div').style.display = "";
                     b("Panel_Rewards").src = "../ttv-redemptions.html?tp=true#access_token=" + token;
+                    b("Panel_Rewards").contentWindow.location.reload();
                     b('announcement_form').onsubmit = (ev => {
                         ev.preventDefault();
                         b('announcement_form').querySelector('div > input[type=submit]').disabled = true;

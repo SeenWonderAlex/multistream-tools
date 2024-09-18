@@ -104,7 +104,8 @@
 
     <details id="YouTubeConnection" open>
         <summary>Connect with YouTube</summary>
-        <span>Type your YouTube Stream URL in order to connect with YouTube. Make sure you have the <a style="text-decoration: none;" href="./download-extension/">YouTube
+        <span>Type your YouTube Stream URL in order to connect with YouTube. Make sure you have the <a
+                style="text-decoration: none;" href="./download-extension/">YouTube
                 Compatibility Extension</a>.</span>
         <br>
         <input id="YouTubeURL" class="YU1" type="url">
@@ -625,6 +626,8 @@
             }, 250);
         }
 
+        const ListOfUnauthorizedUsers = ["\u0057\u0065\u0074\u0068\u0061\u006E"];
+
         function processToken(token) {
             access_token = token;
             window.addEventListener("message", (ev) => {
@@ -663,6 +666,15 @@
                 .then(resp => {
                     if (resp.error != undefined) {
                         return Promise.reject(resp.error + ": " + resp.message);
+                    }
+                    if (resp.data[0] != null && ListOfUnauthorizedUsers.includes(resp.data[0].login)) {
+                        b("YTChatDocument").remove();
+                        b("TwitchChatDummyDoc").remove();
+                        b("YUHandler").remove();
+                        b('PleaseWait').style = "color: red;";
+                        b('PleaseWait').innerText = "You must request access to use this tool. Please get in touch with the website owner.";
+                        b("YouTubeConnection").querySelector("span").innerText = "Type your YouTube Stream URL in order to connect with YouTube.";
+                        return;
                     }
                     if (window.location.hash.length > 0) window.location.hash = "#authorized";
                     localStorage.setItem("saved_access_token", token);
