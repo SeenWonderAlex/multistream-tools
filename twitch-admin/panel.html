@@ -854,6 +854,7 @@
 
         function processToken(token) {
             access_token = token;
+            b("Panel_Rewards").src = "about:blank;";
             fetch(
                 'https://api.twitch.tv/helix/users',
                 {
@@ -874,7 +875,6 @@
                     processToken_forRewards(token);
                     document.querySelector('div').style.display = "";
                     b("Panel_Rewards").src = "../ttv-redemptions.html?tp=true#access_token=" + token;
-                    b("Panel_Rewards").contentWindow.location.reload();
                     b('announcement_form').onsubmit = (ev => {
                         ev.preventDefault();
                         b('announcement_form').querySelector('div > input[type=submit]').disabled = true;
