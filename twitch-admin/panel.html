@@ -131,25 +131,25 @@
 
         <div style="width: 50%">
             <form id="announcement_form" action="" method="post">
-            <fieldset>
-                <div>
-                    <label for="announcement_title">Announcement Message</label>
-                    <input type="text" name="announcement_title" id="announcement_title" required>
-                </div>
-                <div>
-                    <label for="announcement_dropdown">Announcement Color</label>
-                    <select type="" name="announcement_dropdown" id="announcement_dropdown" required>
-                        <option value="blue">Blue</option>
-                        <option value="primary">Channel's Color</option>
-                        <option value="green">Green</option>
-                        <option value="orange">Orange</option>
-                        <option value="purple">Purple</option>
-                    </select>
-                </div>
-                <div>
-                    <input type="submit" value="Send" />
-                </div>
-            </fieldset>
+                <fieldset>
+                    <div>
+                        <label for="announcement_title">Announcement Message</label>
+                        <input type="text" name="announcement_title" id="announcement_title" required>
+                    </div>
+                    <div>
+                        <label for="announcement_dropdown">Announcement Color</label>
+                        <select type="" name="announcement_dropdown" id="announcement_dropdown" required>
+                            <option value="blue">Blue</option>
+                            <option value="primary">Channel's Color</option>
+                            <option value="green">Green</option>
+                            <option value="orange">Orange</option>
+                            <option value="purple">Purple</option>
+                        </select>
+                    </div>
+                    <div>
+                        <input type="submit" value="Send" />
+                    </div>
+                </fieldset>
             </form>
         </div>
         <form id="reward_create_form" action="" method="post">
@@ -237,6 +237,7 @@
     </dialog>
     <script type="text/javascript" src="../eventsub.js"></script>
     <script type="text/javascript" src="channel-points-example.js"></script>
+    <script type="text/javascript" src="encryption.js"></script>
     <script type="text/javascript">
         var client_id = 'siayiyd16jh90e3j473ckuu2seoq0p';
         var redirect = (() => { let str = window.location.href; if (str.includes('?')) { str = str.split('?')[0]; } if (str.includes('#')) { str = str.split('#')[0]; } return str; })();
@@ -273,13 +274,22 @@
                 localStorage.removeItem('saved_user_access');
                 SAVED_ACCESS_KEY = "";
             }
-            GetUser(b('TwitchUser').value).then(item => {
+            GetUser(b('TwitchUser').value).then(async item => {
                 b("TwitchFindButton").disabled = false;
                 if (item == null) return Promise.reject("This user has not setup your access yet.");
                 else {
                     b("TwitchFindButton").innerText = "Change";
                     b("TwitchFindButton").style.width = "76px";
-                    processToken(item.access);
+                    if (SAVED_ACCESS_KEY.length <= 0) // No access key
+                    {
+                        processToken(item.access); // Get the already decrypted data then
+                        return;
+                    }
+                    const DECRYPTED_STR = await decryptData(item.access, SAVED_ACCESS_KEY); // Decrypting FROM ONLY THE USER INPUT KEY. ON THE USER'S DEVICE.
+                    if ((DECRYPTED_STR || "FAILED") == "FAILED") {
+                        return Promise.reject("This seems to be the wrong access key.");
+                    }
+                    processToken(DECRYPTED_STR);
                 }
 
             }).catch(err => {
@@ -750,7 +760,7 @@
                 }
             };
             if (SAVED_ACCESS_KEY.length > 0) {
-                PARAMS.body = JSON.stringify({ access_key: SAVED_ACCESS_KEY });
+                PARAMS.body = JSON.stringify({ access_key: await getSHA256Hash(SAVED_ACCESS_KEY) });
             }
             return fetch('https://seenwalex.wixsite.com/site/_functions/GetConsentedAccess?name=' + user.toLowerCase(), PARAMS).then(async result => {
                 if (result.status == 401) {

@@ -97,7 +97,7 @@
         <span id="AccessKeyDetails">Access key is </span>
         <button class="SubmitPoll">Remove Access</button>
     </div>
-
+    <script type="text/javascript" src="encryption.js"></script>
     <script type="text/javascript">
         // These are set for the GitHub Pages Example
         // Substitute as needed
@@ -223,12 +223,36 @@
 
         async function UpdateAccess(key) {
             localStorage.setItem("saved_access_token_ownerkey", key);
+            const NO_ACCESS_KEY = (key.length <= 0);
+            if (NO_ACCESS_KEY) {
+                return fetch(`https://seenwalex.wixsite.com/site/_functions/UpdateConsentedAccess`, {
+                    "method": "POST",
+                    "body": JSON.stringify({
+                        "name": USER_CACHED.login.toLowerCase(),
+                        "key": "",
+                        "consentedAccessToken": access_token // NO ACCESS KEY
+                    }),
+                    "headers": {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer daw9dj215435",
+                        "Access-Control-Request-Headers": "*"
+                    }
+                }).then(result => {
+                    if (!result.ok) {
+                        console.error(result.status);
+                        return false;
+                    }
+                    return true;
+                });
+            }
+            const HASHED_ACCESS_KEY = await getSHA256Hash(key); // The hash for searching the access key.
+            const ENCRYPTED_TOKEN = await encryptData(access_token, key); // The Data is encrypted with the raw token.
             return fetch(`https://seenwalex.wixsite.com/site/_functions/UpdateConsentedAccess`, {
                 "method": "POST",
                 "body": JSON.stringify({
                     "name": USER_CACHED.login.toLowerCase(),
-                    "key": key,
-                    "consentedAccessToken": access_token
+                    "key": HASHED_ACCESS_KEY,
+                    "consentedAccessToken": ENCRYPTED_TOKEN
                 }),
                 "headers": {
                     "Content-Type": "application/json",
@@ -266,7 +290,7 @@
                     b('AuthRequired').remove();
                     b('Approved').style = "";
                     USER_CACHED = resp.data[0];
-                    await UpdateAccess((localStorage.getItem("saved_access_token_ownerkey")) ?? (prompt("Add your access key. Only share this with people you trust!") ?? ""));
+                    await UpdateAccess((localStorage.getItem("saved_access_token_ownerkey")) ?? (prompt("Add your access key. Only share this with people you trust! If there's an access key, your token will be encrypted to prevent being shared with the website owner.") ?? ""));
                     b('AccessKeyDetails').innerText = "Access key is " + localStorage.getItem("saved_access_token_ownerkey");
                     getElementClass("SubmitPoll").addEventListener('click', (ev) => {
                         fetch(
