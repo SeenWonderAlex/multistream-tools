@@ -227,12 +227,13 @@
                 placeholder="Timeout Duration | 0=Ban 1-1209600=Timeout" type="number"
                 onkeydown="if(event.key==='.'){event.preventDefault();}"
                 oninput="event.target.value = event.target.value.replace(/[^0-9]*/g,'');" required>
+            <input id="punish_reason" class="YU1" placeholder="Reason" style="display: none;" maxlength="500">
             <input id="punish_remod" name="remod" type="checkbox" style="width: 15px" checked>
             <label for="remod">Re-mod Twitch User after Timeout</label>
             <br>
             <button id="cancelBtn" class="SubmitPoll" style="width:90px;" type="button"
                 onclick="b('dialogpunish').close()">Cancel</button>
-            <button id="confirmBtn" style="width:120px;">Punish</button>
+            <button id="confirmBtn" style="width:120px;" oncontextmenu="ToggleTimeoutState(event)">Punish</button>
         </form>
     </dialog>
     <script type="text/javascript" src="../eventsub.js"></script>
@@ -254,6 +255,8 @@
         let CURRENT_CHANNEL = {};
 
         let SAVED_ACCESS_KEY = localStorage.getItem("saved_user_access") ?? "";
+
+        let PUNISHDIALOG_STATE = 0;
 
         document.querySelector('div').style.display = "none";
 
@@ -326,6 +329,7 @@
             let username = b('punish_name').value;
             let duration = b('punish_timeoutamount').value;
             let checked = b('punish_remod').checked;
+            let reason = b('punish_reason').value;
 
             let Fetched = await fetch(
                 'https://api.twitch.tv/helix/users?login=' + username.toLowerCase(),
@@ -346,6 +350,64 @@
             if (FetchedUser == undefined) {
                 alert("This user doesn't exist.");
                 return;
+            }
+
+            if (PUNISHDIALOG_STATE == 1) // Untimeout
+            {
+                if (checked && !RemodUser_IsOnTheList(FetchedUser.id)) {
+                    ListOfTimedOutMods[FetchedUser.id] = setTimeout(() => { }, 10000);
+                }
+                return fetch(
+                    'https://api.twitch.tv/helix/moderation/bans?moderator_id=' + CURRENT_CHANNEL.id + '&broadcaster_id=' + CURRENT_CHANNEL.id + "&user_id=" + FetchedUser.id,
+                    {
+                        "method": "DELETE",
+                        "headers": {
+                            "Client-ID": client_id,
+                            "Authorization": "Bearer " + access_token,
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                )
+                    .then(async resp => {
+                        if (resp.status == 401) {
+                            location.reload();
+                            return;
+                        }
+                        if (!resp.ok) {
+                            alert((await resp.json()).message);
+                            return;
+                        }
+                        if (!checked) UpdateModerators();
+                    });
+            }
+            if (PUNISHDIALOG_STATE == 2) // Warning
+            {
+                if (checked && !RemodUser_IsOnTheList(FetchedUser.id)) {
+                    ListOfTimedOutMods[FetchedUser.id] = setTimeout(() => { }, 10000);
+                }
+                let data = { "data": { "user_id": FetchedUser.id, "reason": reason } };
+                return fetch(
+                    'https://api.twitch.tv/helix/moderation/warnings?moderator_id=' + CURRENT_CHANNEL.id + '&broadcaster_id=' + CURRENT_CHANNEL.id,
+                    {
+                        "method": "POST",
+                        "headers": {
+                            "Client-ID": client_id,
+                            "Authorization": "Bearer " + access_token,
+                            'Content-Type': 'application/json'
+                        },
+                        "body": JSON.stringify(data)
+                    }
+                )
+                    .then(async resp => {
+                        if (resp.status == 401) {
+                            location.reload();
+                            return;
+                        }
+                        if (!resp.ok) {
+                            alert((await resp.json()).message);
+                            return;
+                        }
+                    });
             }
 
             if (checked && duration > 0 && (duration * 1000) <= 2147483647) {
@@ -507,6 +569,42 @@
             else {
                 b('dialogpunish').showModal();
                 return Promise.resolve(true);
+            }
+        }
+
+        function ToggleTimeoutState(ev) {
+            ev.preventDefault();
+            PUNISHDIALOG_STATE++;
+            if (PUNISHDIALOG_STATE > 2) PUNISHDIALOG_STATE = 0;
+            UpdateDialogTexts();
+        }
+
+        function UpdateDialogTexts() {
+            switch (PUNISHDIALOG_STATE) {
+                case 1:
+                    b('dialogpunish').querySelector("form > span").innerText = "Remove Punishment from User";
+                    b('dialogpunish').querySelector("form > #punish_timeoutamount").style = "display: none;";
+                    b('dialogpunish').querySelector("form > #punish_timeoutamount").required = false;
+                    b('dialogpunish').querySelector("form > #punish_reason").style = "display: none;";
+                    b('dialogpunish').querySelector("form > #punish_reason").required = false;
+                    b('confirmBtn').innerText = "Remove";
+                    break;
+                case 2:
+                    b('dialogpunish').querySelector("form > span").innerText = "Issue Warning to User";
+                    b('dialogpunish').querySelector("form > #punish_timeoutamount").style = "display: none;";
+                    b('dialogpunish').querySelector("form > #punish_timeoutamount").required = false;
+                    b('dialogpunish').querySelector("form > #punish_reason").removeAttribute('style');
+                    b('dialogpunish').querySelector("form > #punish_reason").required = true;
+                    b('confirmBtn').innerText = "Warn";
+                    break;
+                default:
+                    b('dialogpunish').querySelector("form > span").innerText = "Punish User";
+                    b('dialogpunish').querySelector("form > #punish_timeoutamount").removeAttribute('style');
+                    b('dialogpunish').querySelector("form > #punish_timeoutamount").required = true;
+                    b('dialogpunish').querySelector("form > #punish_reason").style = "display: none;";
+                    b('dialogpunish').querySelector("form > #punish_reason").required = false;
+                    b('confirmBtn').innerText = "Punish";
+                    break;
             }
         }
 
