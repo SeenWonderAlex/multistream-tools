@@ -1,7 +1,5 @@
 # The Extension source folder. It'll be packaged in a zip instead.
 YouTube Compatibility Extension/
-twitch-admin/owner-unprotected.html
-twitch-admin/panel-unprotected.html
 # Unneeded pictures
 download-extension/Preview 1.png
 download-extension/Preview 2.png
