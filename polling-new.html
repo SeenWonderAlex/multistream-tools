@@ -132,7 +132,7 @@
             <div id="PPollDuration" class="PollProgressBar RedColor"></div>
         </div>
         <p id="PollDuration">00:00</p>
-        <button class="SubmitPoll" onclick="EndPollEarly(true)">End Polls Early</button>
+        <button class="SubmitPoll" onclick="EndPollEarly(false)" oncontextmenu="event.preventDefault(); EndPollEarly(true);">End Polls Early</button>
     </div>
 
     <div id="PleaseWait" style="display: none;">
@@ -672,7 +672,7 @@
                     console.error("YouTube Authentication Failed: ", err);
                     localStorage.removeItem('ytsavedtoken');
                     b('YouTubeConnection').innerHTML = "YouTube Authentication is required to continue.";
-                    document.body.insertAdjacentHTML('beforebegin', `<ul id="AuthRequired" style="" class="Oops"><img src="./cdn/HmmNotes-On_a_stack-7tv.gif"><span style="font-size: 16px;">Every hour, we need to reverify you to continue using this tool. Please visit the link again to reauthorize. Remember that we ONLY use the API for this tool:</span><button id="authorize">Authorize YouTube (I acknowledge what I read above)</button></ul>`)
+                    document.body.insertAdjacentHTML('beforebegin', `<ul id="AuthRequired2" style="padding: 3px; border-radius: 6px; border: thick solid; position: relative;" class="Oops"><img src="./cdn/HmmNotes-On_a_stack-7tv.gif"><span style="font-size: 16px; position: absolute; left: 110px; font-size: 24px;">Every hour, we need to reverify you to continue using this tool. Please visit the link again to reauthorize. Remember that we ONLY use the API for this tool:</span><button id="authorize" style="position: absolute; left: 110px; top: 65px; width: 92%;">Authorize YouTube (I acknowledge what I read above)</button></ul>`)
                     document.getElementById('authorize').onclick = (ev) => { YoutubeLinkHandler(); };
                 });
         }
@@ -954,7 +954,7 @@
                 }).catch(err => {
                     console.error(err);
                 });
-                ConnectedYTPoll = "ENDING"; // So the Twitch one won't end and give an error.e
+                ConnectedYTPoll = "ENDING"; // So the Twitch one won't end and give an error.
             }
             if (ConnectedPollID != "NONE") {
                 fetch(
