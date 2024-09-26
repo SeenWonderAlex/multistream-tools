@@ -130,7 +130,8 @@
         </table>
 
         <div style="width: 50%">
-            <form id="announcement_form" action="" method="post">
+            <!-- I will replace this with another function soon -->
+            <!-- <form id="announcement_form" action="" method="post">
                 <fieldset>
                     <div>
                         <label for="announcement_title">Announcement Message</label>
@@ -150,7 +151,7 @@
                         <input type="submit" value="Send" />
                     </div>
                 </fieldset>
-            </form>
+            </form> -->
         </div>
         <form id="reward_create_form" action="" method="post">
             <fieldset>
@@ -973,26 +974,26 @@
                     processToken_forRewards(token);
                     document.querySelector('div').style.display = "";
                     b("Panel_Rewards").src = "../ttv-redemptions.html?tp=true#access_token=" + token;
-                    b('announcement_form').onsubmit = (ev => {
-                        ev.preventDefault();
-                        b('announcement_form').querySelector('div > input[type=submit]').disabled = true;
-                        fetch(`https://api.twitch.tv/helix/chat/announcements?broadcaster_id=${CURRENT_CHANNEL.id}&moderator_id=${CURRENT_CHANNEL.id}`, {
-                            "method": "POST", "headers": {
-                                'Content-Type': 'application/json',
-                                'Authorization': 'Bearer ' + access_token,
-                                'Client-Id': client_id
-                            }, "body": JSON.stringify({
-                                "message": b('announcement_title').value,
-                                "color": b('announcement_dropdown').value
-                            })
-                        }).then(res => {
-                            if (res.status == 401) { location.reload(); return; }
-                            if (!res.ok) {
-                                alert("Failed to send message");
-                            }
-                            b('announcement_form').querySelector('input[type=submit]').disabled = false;
-                        }).catch(err => { console.error(err); b('announcement_form').querySelector('input[type=submit]').disabled = false; })
-                    });
+                    // b('announcement_form').onsubmit = (ev => {
+                    //     ev.preventDefault();
+                    //     b('announcement_form').querySelector('div > input[type=submit]').disabled = true;
+                    //     fetch(`https://api.twitch.tv/helix/chat/announcements?broadcaster_id=${CURRENT_CHANNEL.id}&moderator_id=${CURRENT_CHANNEL.id}`, {
+                    //         "method": "POST", "headers": {
+                    //             'Content-Type': 'application/json',
+                    //             'Authorization': 'Bearer ' + access_token,
+                    //             'Client-Id': client_id
+                    //         }, "body": JSON.stringify({
+                    //             "message": b('announcement_title').value,
+                    //             "color": b('announcement_dropdown').value
+                    //         })
+                    //     }).then(res => {
+                    //         if (res.status == 401) { location.reload(); return; }
+                    //         if (!res.ok) {
+                    //             alert("Failed to send message");
+                    //         }
+                    //         b('announcement_form').querySelector('input[type=submit]').disabled = false;
+                    //     }).catch(err => { console.error(err); b('announcement_form').querySelector('input[type=submit]').disabled = false; })
+                    // });
                 })
                 .catch(err => {
                     console.error(err);

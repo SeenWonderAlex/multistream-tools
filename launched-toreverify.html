@@ -1,0 +1,30 @@
+<body>
+    <script>
+        const urlParams = new URLSearchParams(window.location.hash.replace('#', '?'));
+        const token = urlParams.get('access_token');
+        const isYouTube = urlParams.get('state') == "ytreverify2";
+        location.hash = "#authorized";
+        if (!isYouTube) {
+            document.write("???");
+            throw new Error("Not youtube");
+        }
+        fetch('https://www.googleapis.com/youtube/v3/channels?part=id&mine=true&access_token=' + token)
+            .then(async result => {
+                if (!result.ok) return Promise.reject(await result.json());
+                localStorage.setItem('ytsavedtoken', token);
+                if (window.opener) {
+                    window.opener.postMessage({ "type": "REVERIFIED", "retrieved": token }, "*");
+                    let span = document.createElement('span');
+                    span.innerText = "You may close this tab!";
+                    document.body.append(span);
+                    window.close();
+                }
+            })
+            .catch(err => {
+                console.error("YouTube Authentication Failed: " + JSON.stringify(err));
+                localStorage.removeItem('ytsavedtoken');
+                document.write("YouTube Authentication Failed: " + JSON.stringify(err));
+            });
+        setTimeout(() => { window.close(); }, 10000)
+    </script>
+</body>

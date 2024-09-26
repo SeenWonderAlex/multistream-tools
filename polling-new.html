@@ -1,7 +1,7 @@
 <html>
 
 <head>
-    <title>Multistream Tools - Polling</title>
+    <title>Multistream Tools - Polling (Beta)</title>
     <link rel="stylesheet" href="./style.css" />
     <link rel="icon" type="image/x-icon" href="./favicon.ico">
     <style>
@@ -84,39 +84,16 @@
 </head>
 
 <body>
-    
-    <ul id="NewBeta">
-        <img src="./cdn/BOOBA.webp">
-        <span>An extension-less of this tool is now in BETA!</span>
-        <ul>This includes:</ul>
-        <ul class="a">- Accurate Vote Responses from YouTube itself (high amounts were predicted by percentage)</ul>
-        <ul class="a">- Add up to five options on both platforms</ul>
-        <ul class="a">- Ability to add poll presets</ul>
-        <button onclick="if (confirm('This is currently in testing phase. The YouTube Authentication app has not been verified, so we can only test this with a small amount of users. If you want to participate, please contact swagamesofficial@gmail.com')) location.href='./polling-new.html'">Try It Out!</button>
-    </ul>
     <ul id="AuthRequired" style="display: none;">
         <img src="./cdn/HmmNotes-On_a_stack-7tv.gif">
-        <span>Let's get you to authorize this website! We'll ask you to approve some permissions as well the app itself.
-            You can always revoke our permissions later in your Twitch settings.</span>
+        <span>This is Step 1. You'll first need to authenticate with Twitch. Click the button to prompt permissions.
+            Right click if you only want to prompt the permissions we need.</span>
         <button id="authorize">Authorize Twitch</button>
     </ul>
 
-    <dialog id="yes_or_no_confirmation">
-        <p>It looks like you're going to run a YES or NO poll. Are you sure this is the poll you're creating?</p>
-        <br>
-        <form method="dialog">
-            <button onclick="SubmitPoll()">Yes & Run Poll</button>
-            <br>
-            <br>
-            <button class="SubmitPoll">No & Edit Poll</button>
-        </form>
-    </dialog>
-
     <details id="YouTubeConnection" open>
         <summary>Connect with YouTube</summary>
-        <span>Type your YouTube Stream URL in order to connect with YouTube. Make sure you have the <a
-                style="text-decoration: none;" href="./download-extension/">YouTube
-                Compatibility Extension</a>.</span>
+        <span>Load a recent stream or type your YouTube Stream URL in order to connect with YouTube.</span>
         <br>
         <input id="YouTubeURL" class="YU1" type="url">
         <button onclick="LoadURL();" class="YU2">Load</button>
@@ -125,7 +102,7 @@
 
     <iframe id="TwitchChatDummyDoc" src="about:blank" height="450"
         sandbox="allow-storage-access-by-user-activation allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-modals"></iframe>
-    <iframe id="YTChatDocument" src="about:blank" height="450"></iframe>
+    <iframe id="YTChatDummyDoc" src="about:blank" height="450"></iframe>
 
     <div id="CurrentPoll" style="display: none;">
         <span class="PollQuestion PollQ">Poll Question</span>
@@ -144,6 +121,10 @@
         <p id="PollOption4" class="PollOption" style="display: none;">0%</p>
         <div class="PollProgress" style="display: none;">
             <div id="PPollOption4" class="PollProgressBar"></div>
+        </div>
+        <p id="PollOption5" class="PollOption" style="display: none;">0%</p>
+        <div class="PollProgress" style="display: none;">
+            <div id="PPollOption5" class="PollProgressBar"></div>
         </div>
         <br>
         <br>
@@ -166,20 +147,66 @@
     </div>
 
     <div id="CreatePollEditor" style="display: none;">
-        <span>Use the YouTube chat to fill out the poll options. Click the Create Poll button below to start a poll in
-            both chats!</span>
-        <br>
-        <label for="Editor_PollDuration">Poll Duration:</label>
-        <select name="Editor_PollDuration" id="Editor_PollDuration">
-            <option value="30">30 Seconds</option>
-            <option value="60">1 Minute</option>
-            <option value="120">2 Minutes</option>
-            <option value="300">5 Minutes</option>
-            <option value="900">15 Minutes</option>
-            <option value="1800">30 Minutes</option>
-        </select>
-        <br>
-        <button onclick="CheckPoll()">Create Poll</button>
+        <div id="Create">
+            <p style="color: white; text-align: center;">CREATE A POLL FROM</p>
+            <br>
+            <button onclick="ShowPresets()" class="YU3" style="width: 49%;">Presets</button>
+            <button onclick="ShowNewPoll()" style="width: 49%;" tabindex="1">New</button>
+        </div>
+        <div id="GetPresets" style="display: none;">
+            <label for="EditorPresets">Select a Preset:</label>
+            <select name="EditorPresets" id="EditorPresets" required>
+
+            </select>
+            <br>
+            <div style="display: flex;">
+                <button type="button" class="YU3" onclick="LoadPreset()">Load Preset</button>
+                <button type="button" style="width: 25px; float: left; height: 25px; background: none;"
+                    onclick="DeletePreset()">X</button>
+            </div>
+
+        </div>
+        <div id="NewEditor" style="display: none;">
+            <form action="#" onsubmit="event.preventDefault(); CheckPoll();">
+                <span>Add up to 5 options on both platforms! Click the Create Poll button below to start a poll
+                    in
+                    both chats!</span>
+                <br>
+                <div style="display: flex;">
+                    <input type="text" id="Editor_PollQuestion" class="YU1" placeholder="Ask a question..."
+                        style="width: 100%;" required>
+                    <button type="button" style="width: 25px; float: left; height: 25px;"
+                        onclick="AddOption()">+</button>
+                </div>
+                <span>Choices:</span>
+                <br>
+                <div id="EditorOptions">
+                    <div style="display: flex;">
+                        <button type="button"
+                            style="width: 25px; float: left; height: 25px; background: none;">X</button>
+                        <input type="text" class="YU1" placeholder="Choice 1" required style="width: 100%;">
+                    </div>
+                    <div style="display: flex;">
+                        <button type="button"
+                            style="width: 25px; float: left; height: 25px; background: none;">X</button>
+                        <input type="text" class="YU1" placeholder="Choice 2" required style="width: 100%;">
+                    </div>
+                </div>
+                <label for="Editor_PollDuration">Poll Duration:</label>
+                <select name="Editor_PollDuration" id="Editor_PollDuration">
+                    <option value="30">30 Seconds</option>
+                    <option value="60">1 Minute</option>
+                    <option value="120">2 Minutes</option>
+                    <option value="300">5 Minutes</option>
+                    <option value="900">15 Minutes</option>
+                    <option value="1800">30 Minutes</option>
+                </select>
+                <br>
+                <button type="submit">Create Poll</button>
+                <br>
+                <button type="button" class="YU3" id="CreatePresetButton">Create Preset</button>
+            </form>
+        </div>
     </div>
 
     <details id="PollResultsDiv" open style="display: none;">
@@ -222,6 +249,15 @@
                 style="border-top-right-radius: 25px; border-bottom-right-radius: 25px; width: 0%; background-color: rgb(222, 46, 46);">
             </div>
         </div>
+        <p id="Res_PollOption5" class="PollOption">0%</p>
+        <div class="PollProgress" style="display: none;">
+            <div id="RPOpt5_TTV" class="PollProgressBarResult"
+                style="border-top-left-radius: 25px; border-bottom-left-radius: 25px; width: 0%; background-color: rgb(96, 53, 197);">
+            </div>
+            <div id="RPOpt5_YT" class="PollProgressBarResult"
+                style="border-top-right-radius: 25px; border-bottom-right-radius: 25px; width: 0%; background-color: rgb(222, 46, 46);">
+            </div>
+        </div>
     </details>
 
     <!-- <details id="SpamProtectionDetailed" style="display: none;" open>
@@ -236,6 +272,10 @@
 
     <script type="text/javascript" src="./eventsub.js"></script>
     <script type="text/javascript">
+        if (location.hostname == "seenwonderalex.github.io" && location.pathname.includes('polling-new')) {
+            document.write("Still in development");
+            throw new Error("Can't continue");
+        }
         // These are set for the GitHub Pages Example
         // Substitute as needed
         var client_id = 'siayiyd16jh90e3j473ckuu2seoq0p';
@@ -248,16 +288,17 @@
         var ConnectedPollID = '';
         var ConnectedYTPoll = '';
 
-        // const ENABLE_SPAM_PROTECTION = false;
-        // let SPAM_PROTECTION_CHECKED = true;
-
         // Ellipsis Check
         var Ellipsis = 0;
         var redemptions = [];
         const EllipsisText = ["", ".", "..", "..."]
 
+        var Presets = {};
+        var Presets_Loaded = "";
+
         // document.getElementById('authorize').setAttribute('href', 'https://id.twitch.tv/oauth2/authorize?client_id=' + client_id + '&redirect_uri=' + encodeURIComponent(redirect) + '&response_type=token&scope=user:read:chat+channel:moderate+moderator:manage:banned_users+channel:manage:moderators+moderation:read+channel:read:redemptions+channel:manage:polls+channel:read:polls+moderator:read:chat_settings');
         document.getElementById('authorize').onclick = (ev) => { location.href = 'https://id.twitch.tv/oauth2/authorize?client_id=' + client_id + '&redirect_uri=' + encodeURIComponent(redirect) + '&response_type=token&scope=chat:read+channel:moderate+moderation:read+channel:read:redemptions+channel:manage:polls+channel:read:polls+moderator:read:chat_settings&state=ttv3e43v1' };
+        document.getElementById('authorize').oncontextmenu = (ev) => { ev.preventDefault(); location.href = 'https://id.twitch.tv/oauth2/authorize?client_id=' + client_id + '&redirect_uri=' + encodeURIComponent(redirect) + '&response_type=token&scope=chat:read+channel:manage:polls+channel:read:polls&state=ttv3e43v1&force_verify=true' };
         document.addEventListener('DOMContentLoaded', () => {
             handleSavedToken();
         });
@@ -298,20 +339,307 @@
                 verifyYTToken(localStorage.getItem('ytsavedtoken'));
             }
             else {
-                b('YUHandler').innerText = "Load from Recent (authorization required)";
-                b('YUHandler').setAttribute('onclick', "YoutubeLinkHandler();")
+                b('YouTubeConnection').innerHTML = "YouTube Authentication is required to continue.";
+                if (access_token.length > 0) {
+                    b("AuthRequired").getElementsByTagName('span')[0].innerText = "Success! Now, you'll to authenticate your YouTube account. Please remember we are only using the Google API for this tool, and we will NOT use it for any other purpose. Since there is no specific permission, we have to ask this following scope which is the least we can do (PLEASE REMEMBER THAT WE ONLY USE THIS TO CREATE POLLS/GET RECENT BROADCASTS):";
+                    b("AuthRequired").getElementsByTagName('span')[0].style.fontSize = "16px";
+                    b("AuthRequired").className = "Oops";
+                    let bullet = document.createElement('ul');
+                    bullet.classList = "a";
+                    bullet.innerText = "- See, edit, and permanently delete your YouTube videos, ratings, comments and captions";
+                    b("AuthRequired").insertBefore(bullet, document.getElementById('authorize'));
+                    b("AuthRequired").style.display = "";
+                    document.getElementById('authorize').innerText = "Authorize YouTube (I acknowledge what I read above)"
+                    document.getElementById('authorize').onclick = (ev) => { if (confirm("We will ask the permission that we specified. It'll be only used to function this tool. IT WILL NOT BE USED FOR ANY OTHER PURPOSE. In addition, token resets every hour so we'll need to ask you again if you want to continue using this tool. Continue?")) YoutubeLinkHandler(); };
+                    document.body.insertBefore(b('AuthRequired').cloneNode(true), document.body.firstChild);
+                    b("AuthRequired").style.display = "none";
+                }
             }
+        }
 
-            if (localStorage.getItem('saved_url') != null && localStorage.getItem('saved_url').length > 0) {
-                b("YouTubeURL").value = localStorage.getItem('saved_url');
-                LoadURL();
+        function ShowPresets() {
+            b('Create').style = "display: none;";
+            b('NewEditor').style = "display: none;";
+            LoadPresets();
+            b('GetPresets').style = "";
+        }
+
+        function ShowNewPoll() {
+            b('Create').style = "display: none;";
+            b('NewEditor').style = "";
+            b('GetPresets').style = "display: none;";
+        }
+
+        function AddOption() {
+            const Options = b('EditorOptions');
+            const option = document.createElement('div');
+            const button = document.createElement('button');
+            const input = document.createElement('input');
+            option.style.display = "flex";
+            button.style = "width: 25px; float: left; height: 25px; background: none;";
+            button.innerText = "X";
+            button.type = "button";
+            button.tabIndex = 1;
+            input.type = "text";
+            input.className = "YU1";
+            input.placeholder = "Choice " + (Options.childElementCount + 1);
+            input.style.width = "100%";
+            option.append(button);
+            option.append(input);
+            button.addEventListener('click', () => {
+                if (b('EditorOptions').childElementCount <= 2) return; // Can't remove less than 2 options.
+                option.remove();
+                ValidatePollOptions();
+                const OptionsList = b('EditorOptions').children;
+                try {
+                    for (let i = 0; i < OptionsList.length; i++) {
+                        if (i <= 1) {
+                            OptionsList[i].querySelector("div > input").required = true;
+                        }
+                        OptionsList[i].querySelector("div > input").placeholder = "Choice " + (i + 1);
+                    }
+                } catch (error) {
+                    console.error(error);
+                }
+            });
+            Options.append(option);
+            ValidatePollOptions();
+            return input;
+        }
+
+        // Check availability...
+        function ValidatePollOptions() {
+            const count = b('EditorOptions').childElementCount;
+            b('NewEditor').querySelector("button[type=submit]").disabled = count < 2 || count > 5;
+            return count >= 2 && count <= 5;
+        }
+
+        // Save Presets to local storage
+        function SaveToLocalStorage() {
+            localStorage.setItem('Presets', JSON.stringify(Presets));
+        }
+
+        // Load Presets
+        function LoadPresets() {
+            Presets = JSON.parse(localStorage.getItem('Presets') ?? '{}');
+            let List = [];
+            for (let i = 0; i < Object.keys(Presets).length; i++) {
+                List.push(Object.keys(Presets)[i]);
+            }
+            const EditorPresets = b('EditorPresets');
+            while (EditorPresets.firstChild) {
+                EditorPresets.removeChild(EditorPresets.lastChild);
+            }
+            List.forEach(ele => {
+                const option = document.createElement('option');
+                option.value = ele;
+                option.innerText = ele;
+                EditorPresets.append(option);
+            });
+        }
+
+        // Load the preset
+        function LoadPreset() {
+            const Value = b('EditorPresets').value;
+            if (Value.length <= 0) {
+                ShowNewPoll();
+                ValidatePollOptions();
+                return;
+            }
+            let Preset = Presets[Value];
+            if (Preset != undefined) {
+                const EditorOptions = b('EditorOptions');
+                while (EditorOptions.firstChild) {
+                    EditorOptions.removeChild(EditorOptions.lastChild);
+                }
+                b('Editor_PollQuestion').value = Preset.prompt;
+                for (let i = 0; i < Preset.options.length; i++) { AddOption().value = Preset.options[i]; }
+            }
+            ShowNewPoll();
+            ValidatePollOptions();
+        }
+
+        // Delete the preset
+        function DeletePreset() {
+            const Value = b('EditorPresets').value;
+            let Preset = Presets[Value];
+            if (Preset != undefined) {
+                Presets[Value] = undefined;
+                delete Preset;
+                SaveToLocalStorage();
+                ShowPresets();
+            }
+        }
+
+        // We setup the current X buttons
+        (function () {
+            const EditorOptions = b('EditorOptions');
+            while (EditorOptions.firstChild) {
+                EditorOptions.removeChild(EditorOptions.lastChild);
+            }
+            AddOption(); AddOption();
+            b('CreatePresetButton').addEventListener('click', (ev) => {
+                const name = prompt("Enter a preset name. Any existing preset with the exact name will be replaced.", Presets_Loaded);
+                if (name == null || name.length <= 0) return;
+                let Preset = { "prompt": b('Editor_PollQuestion').value, "options": [] };
+                const OptionInputs = b('EditorOptions').querySelectorAll("div > input");
+                for (let i = 0; i < OptionInputs.length; i++) {
+                    Preset.options.push(OptionInputs[i].value);
+                }
+                Presets[name] = Preset;
+                SaveToLocalStorage();
+            });
+            b('CreatePresetButton').addEventListener('contextmenu', (ev) => {
+                ev.preventDefault();
+                ShowPresets();
+            });
+        })();
+
+        let YTAccessToken = "";
+        let YTChatID = "";
+        let Retries = 4;
+        let YTIsFetching = false;
+
+        function CheckPollUpdates() {
+            if (ConnectedYTPoll == "NONE") {
+                console.warn("A poll isn't running anymore, ignoring request.");
+                return;
+            }
+            if (YTIsFetching) // A bug that it sends more than one request at once. This is a workaround;
+            {
+                console.warn("A simultaneously operation was detected and prevented.");
+                return;
+            }
+            YTIsFetching = true;
+            return fetch('https://www.googleapis.com/youtube/v3/liveChat/messages?part=snippet&maxResults=200&liveChatId=' + YTChatID, { // No need for data, just IDs.
+                "headers": {
+                    "Authorization": "Bearer " + YTAccessToken,
+                    "Accept": "application/json"
+                }
+            }).then(res => {
+                YTIsFetching = false;
+                if (!res.ok) {
+                    console.warn("[YT] We are unable to access the live chat right now. We'll try again in 2 seconds.");
+                    return Promise.reject("failed to update");
+                }
+                return res.json();
+            }).then(json => {
+                if (json.activePollItem != undefined && json.activePollItem.id == ConnectedYTPoll) { // Check if the poll is the same as the linked ID
+                    SetYTPollRes(json.activePollItem);
+                    setTimeout(CheckPollUpdates, json.pollingIntervalMillis); // Timeout in a polling interval according to YouTube.
+                    return json.activePollItem;
+                }
+                if (Retries > 0) {
+                    Retries--;
+                    console.warn("[YT] Has not received poll item yet!");
+                    return Promise.reject("no poll item received");
+                }
+                // No more poll... We'll no longer send requests and set the YT poll ID to none.
+                ConnectedYTPoll = "NONE";
+                console.warn("[YT] A poll isn't running in YouTube anymore, previous results will remain the same for this session")
+                return null;
+            }).catch(err => {
+                YTIsFetching = false;
+                console.warn("[YT] Request failed. Retrying in 2 seconds");
+                if (ConnectedYTPoll != "NONE") setTimeout(CheckPollUpdates, 2000);
+                return Promise.reject("failed to update");
+            });
+        }
+
+        function LoadYTBroadcast(ID) {
+            return fetch('https://youtube.googleapis.com/youtube/v3/liveBroadcasts?part=snippet&broadcastType=all&maxResults=1&id=' + ID, {
+                "headers": {
+                    "Authorization": "Bearer " + YTAccessToken,
+                    "Accept": "application/json"
+                }
+            }).then(res => {
+                if (res.status == 401) {
+                    ReverifyPrompt(() => { LoadYTBroadcast(ID); });
+                    return Promise.reject("User needs to re-verify");
+                }
+                return res.json();
+            }).then(json => {
+                if (json.items.length > 0) {
+                    ConnectedYTPoll = "";
+                    YTChatID = json.items[0].snippet.liveChatId;
+                    console.log("[YT] Connected to broadcast!");
+                    return CheckPollDetails();
+                }
+                return Promise.reject("No stream found!");
+            }).catch(err => {
+                console.error(err);
+            });
+        }
+
+        function CheckPollDetails() {
+            return fetch('https://www.googleapis.com/youtube/v3/liveChat/messages?part=id&maxResults=200&liveChatId=' + YTChatID, { // No need for data, just IDs.
+                "headers": {
+                    "Authorization": "Bearer " + YTAccessToken,
+                    "Accept": "application/json"
+                }
+            }).then(res => {
+                if (res.status == 403) {
+                    return Promise.reject("We are unable to access the live chat. Please check your stream settings.");
+                }
+                return res.json();
+            }).then(json => {
+                console.log("[YT] Successfully connected to chat!")
+                if (json.activePollItem != undefined) { // Poll Running
+                    ConnectedYTPoll = json.activePollItem.id;
+                }
+                else {
+                    ConnectedYTPoll = "NONE";
+                }
+            }).catch(err => {
+                console.error(err);
+            });
+        }
+
+        function ReverifyPrompt(event) {
+            // Google's OAuth 2.0 endpoint for requesting an access token
+            var link = new URL('https://accounts.google.com/o/oauth2/v2/auth');
+
+            // Parameters to pass to OAuth 2.0 endpoint.
+            link.search = '?' + new URLSearchParams({
+                'client_id': '597860444523-l87m271jorgmc0a9ea2vnn4ohqkmjphi.apps.googleusercontent.com',
+                'redirect_uri': (() => { let str = window.location.href; if (str.includes('?')) { str = str.split('?')[0]; } if (str.includes('#')) { str = str.split('#')[0]; } return str.replace('polling-new.html', 'launched-toreverify.html'); })(),
+                'response_type': 'token',
+                'scope': 'https://www.googleapis.com/auth/youtube.force-ssl',
+                'state': 'ytreverify2'
+            }).toString();
+            let win = window.open(link, '_blank');
+            if (!win || win.closed || typeof win.closed == 'undefined') {
+                //POPUP BLOCKED
+                alert("Uh oh! We gotta re-verify you. Open the popup that was blocked from your blocker and you'll be prompt to reverify.");
+                let i = setInterval(() => {
+                    if (localStorage.getItem('ytsavedtoken') != null) {
+                        YTAccessToken = localStorage.getItem('ytsavedtoken');
+                        event();
+                        clearInterval(i);
+                    }
+                }, 1000);
+            } else {
+                let onmessage = (ev) => {
+                    if (typeof ev.data === "object" && ev.data.type == "REVERIFIED") {
+                        localStorage.setItem('ytsavedtoken', ev.data.retrieved);
+                        YTAccessToken = localStorage.getItem('ytsavedtoken');
+                        event();
+                        window.removeEventListener('message', onmessage);
+                    }
+                }
+                window.addEventListener('message', onmessage);
             }
         }
 
         function verifyYTToken(token) {
-            fetch('https://www.googleapis.com/youtube/v3/channels?part=snippet&mine=true&access_token=' + token)
+            fetch('https://www.googleapis.com/youtube/v3/channels?part=id&mine=true&access_token=' + token)
                 .then(async result => {
                     if (!result.ok) return Promise.reject(await result.json());
+                    YTAccessToken = token;
+                    if (localStorage.getItem('saved_url') != null && localStorage.getItem('saved_url').length > 0) {
+                        b("YouTubeURL").value = localStorage.getItem('saved_url');
+                        LoadURL();
+                    }
                     b('YUHandler').removeAttribute('onclick');
                     b('YUHandler').onclick = async (ev) => {
                         b('YUHandler').disabled = true;
@@ -319,7 +647,7 @@
                         try {
                             let result = await fetch('https://youtube.googleapis.com/youtube/v3/liveBroadcasts?part=id&broadcastType=all&maxResults=1&mine=true', {
                                 "headers": {
-                                    "Authorization": "Bearer " + token,
+                                    "Authorization": "Bearer " + YTAccessToken,
                                     "Accept": "application/json"
                                 }
                             });
@@ -345,10 +673,11 @@
                     localStorage.setItem('ytsavedtoken', token);
                 })
                 .catch(err => {
-                    console.error("YouTube Authentication Failed: " + err);
+                    console.error("YouTube Authentication Failed: ", err);
                     localStorage.removeItem('ytsavedtoken');
-                    b('YUHandler').innerText = "Load from Recent (authorization required)";
-                    b('YUHandler').setAttribute('onclick', "YoutubeLinkHandler();")
+                    b('YouTubeConnection').innerHTML = "YouTube Authentication is required to continue.";
+                    document.body.insertAdjacentHTML('beforebegin', `<ul id="AuthRequired" style="" class="Oops"><img src="./cdn/HmmNotes-On_a_stack-7tv.gif"><span style="font-size: 16px;">Every hour, we need to reverify you to continue using this tool. Please visit the link again to reauthorize. Remember that we ONLY use the API for this tool:</span><button id="authorize">Authorize YouTube (I acknowledge what I read above)</button></ul>`)
+                    document.getElementById('authorize').onclick = (ev) => { YoutubeLinkHandler(); };
                 });
         }
 
@@ -427,17 +756,20 @@
 
         let IntervalID = 0;
 
-        function PingFrame() {
-            b("YTChatDocument").contentWindow.postMessage("Wait_Check", "*");
-        }
-
         function CheckPoll() {
-            if (PE_Q == "Vote..." && PE_O[0] == "Yes" && PE_O[1] == "No") {
-                b("yes_or_no_confirmation").showModal();
+            if (!ValidatePollOptions()) return;
+            PE_Q = (b('Editor_PollQuestion').value || "Vote...");
+            let Options = [];
+            const OptionInputs = b('EditorOptions').querySelectorAll("div > input");
+            for (let i = 0; i < OptionInputs.length; i++) {
+                if (OptionInputs[i].value.length > 0) Options.push(OptionInputs[i].value);
             }
-            else {
-                SubmitPoll();
+            PE_O = Options;
+            if (PE_O.length < 2 || PE_O.length > 5) {
+                alert("A poll must have 2-5 options.");
+                return;
             }
+            SubmitPoll();
         }
 
         function SubmitPoll() {
@@ -448,9 +780,9 @@
                     Options.push({ "title": PE_O[i].substring(0, 25) });
                 }
             }
-            b("YTChatDocument").contentWindow.postMessage("Post_Poll", "*");
             b("CreatePollEditor").style = "display: none;";
             if (isNaN(Number.parseInt(b("Editor_PollDuration").value))) b("Editor_PollDuration").value = "60";
+            // Twitch Submit Poll
             fetch(
                 url,
                 {
@@ -482,15 +814,46 @@
                     console.log(err);
                     log(`Error with Polls Call Call: ${err.message ? err.message : ''}`);
                 });
+            // YT Submit Poll
+            Options = [];
+            for (var i = 0; i < PE_O.length; i++) {
+                if (PE_O[i].length > 0) {
+                    Options.push({ "optionText": PE_O[i].substring(0, 35) });
+                }
+            }
+            fetch('https://www.googleapis.com/youtube/v3/liveChat/messages?part=snippet', { // No need for data, just IDs.
+                "method": "POST",
+                "headers": {
+                    "Authorization": "Bearer " + YTAccessToken,
+                    "Accept": "application/json"
+                },
+                "body": JSON.stringify({
+                    "snippet": { "liveChatId": YTChatID, "type": "pollEvent", "pollDetails": { "metadata": { "options": Options, "questionText": PE_Q.substring(0, 100) } } }
+                })
+            }).then(res => {
+                if (res.status == 401) {
+                    ReverifyPrompt(SubmitPoll);
+                    if (CheckForPolls) clearInterval(CheckForPolls);
+                    return Promise.reject("User needs to re-verify");
+                }
+                return res.json();
+            }).then(json => {
+                ConnectedYTPoll = json.id;
+                Retries = 2;
+                SetYTPollRes(json);
+                CheckPollUpdates();
+            }).catch(err => {
+                console.error(err);
+            });
             SetPleaseWait("Waiting for YouTube & Twitch");
             var CheckForPolls = setInterval(() => {
-                if (ConnectedPollID == "NONE" && ConnectedYTPoll == "CURRENTLY_ACTIVE") {
+                if (ConnectedPollID == "NONE" && ConnectedYTPoll != "NONE") {
                     SetPleaseWait("Waiting for Twitch");
                 }
                 if (ConnectedPollID != "NONE" && ConnectedYTPoll == "NONE") {
                     SetPleaseWait("Waiting for YouTube");
                 }
-                if (ConnectedPollID != "NONE" && ConnectedYTPoll == "CURRENTLY_ACTIVE") {
+                if (ConnectedPollID != "NONE" && ConnectedYTPoll != "NONE") {
                     clearInterval(CheckForPolls);
                     b("PleaseWait").style = "display: none;";
                     b("CurrentPoll").style = "";
@@ -512,12 +875,10 @@
             localStorage.setItem("saved_url", URL);
             var regExp = /.*(?:youtu.be\/|v\/|u\/\w\/|live\/|watch\?v=)([^#\&\?]*).*/;
             try {
-                b("YTChatDocument").src = "https://youtube.com/live_chat?v=" + (URL.match(regExp)[1] ?? "none") + "&embed_domain=" + location.hostname;
+                b("YTChatDummyDoc").src = "https://youtube.com/live_chat?v=" + (URL.match(regExp)[1] ?? "none") + "&embed_domain=" + location.hostname;
                 let OldText = b("YouTubeConnection").querySelector("span").innerHTML;
                 if (!OldText.includes("invalid") && !OldText.includes("loaded")) {
-                    if (IntervalID == 0) {
-                        IntervalID = setInterval(PingFrame, 1000);
-                    }
+                    LoadYTBroadcast((URL.match(regExp)[1] ?? "none"));
                     b("YouTubeConnection").querySelector("span").innerHTML = "YouTube Chat successfully loaded!";
                     b("YouTubeConnection").querySelector("span").style.color = "green";
                     setTimeout(() => {
@@ -526,6 +887,7 @@
                     }, 1000)
                 }
             } catch (error) {
+                console.error(error);
                 let OldText = b("YouTubeConnection").querySelector("span").innerText;
                 if (!OldText.includes("invalid") && !OldText.includes("loaded")) {
                     b("YouTubeConnection").querySelector("span").innerText = "Invalid YouTube URL!";
@@ -539,10 +901,12 @@
         }
 
         function UpdatePollResponses() {
-            b("PollOption3").style = PE_O[2].length > 0 ? "" : "display: none;";
-            b("PPollOption3").parentElement.style = PE_O[2].length > 0 ? "" : "display: none;";
-            b("PollOption4").style = PE_O[3].length > 0 ? "" : "display: none;";
-            b("PPollOption4").parentElement.style = PE_O[3].length > 0 ? "" : "display: none;";
+            b("PollOption3").style = PE_O.length >= 3 ? "" : "display: none;";
+            b("PPollOption3").parentElement.style = PE_O.length >= 3 ? "" : "display: none;";
+            b("PollOption4").style = PE_O.length >= 4 ? "" : "display: none;";
+            b("PPollOption4").parentElement.style = PE_O.length >= 4 ? "" : "display: none;";
+            b("PollOption5").style = PE_O.length >= 5 ? "" : "display: none;";
+            b("PPollOption5").parentElement.style = PE_O.length >= 5 ? "" : "display: none;";
             // Timer
             var Now = new Date().getTime();
             var distance = PollEndtime.getTime() - Now;
@@ -554,7 +918,7 @@
             }
 
             if ((typeof TwitchPoll === 'object' && TwitchPoll != null) && (typeof YouTubePoll === 'object' && YouTubePoll != null)) {
-                var CombinedVotes = Array((PE_O[2].length > 0 && PE_O[3].length > 0) ? 4 : ((PE_O[2].length > 0 || PE_O[3].length > 0) ? 3 : 2));
+                var CombinedVotes = Array(PE_O.length);
                 var TwitchTotalVotes = 0;
                 const YouTubeTotalVotes = YouTubePoll["Total"];
                 for (let i = 0; i < TwitchPoll["votes"].length; i++) {
@@ -582,13 +946,19 @@
                 }
             }
 
-            if (ConnectedYTPoll != "NONE") {
-                if (AllowYouTubeEvents) {
-                    b("YTChatDocument").contentWindow.postMessage("Stop_Poll", "*");
-                }
-                else {
-                    b("YTChatDocument").contentWindow.postMessage("Stop_PollNoClear", "*"); ConnectedYTPoll = "ENDING_POLL_EARLY";
-                }
+            if (ConnectedYTPoll != "NONE" && !AllowYouTubeEvents) {
+                fetch(`https://content-youtube.googleapis.com/youtube/v3/liveChat/messages/transition?id=${ConnectedYTPoll}&status=closed`, { // End the poll, no matter the response result...
+                    "method": "POST",
+                    "headers": {
+                        "Authorization": "Bearer " + YTAccessToken,
+                        "Accept": "application/json"
+                    }
+                }).then(res => {
+                    ConnectedYTPoll = "NONE";
+                }).catch(err => {
+                    console.error(err);
+                });
+                ConnectedYTPoll = "ENDING"; // So the Twitch one won't end and give an error.e
             }
             if (ConnectedPollID != "NONE") {
                 fetch(
@@ -622,47 +992,44 @@
             b("PollWarning").style = "display: none;";
             SetPleaseWait("Ending YouTube & Twitch polls");
             var CheckForPolls = setInterval(() => {
-                if (ConnectedPollID == "NONE" && ConnectedYTPoll != "NONE") {
-                    SetPleaseWait("Ending YouTube poll");
-                }
                 if (ConnectedPollID != "NONE" && ConnectedYTPoll == "NONE") {
                     SetPleaseWait("Ending Twitch poll");
                 }
-                if (ConnectedPollID == "NONE" && ConnectedYTPoll == "NONE") {
+                else if (ConnectedPollID == "NONE" && ConnectedYTPoll != "NONE") {
+                    SetPleaseWait("Ending YouTube poll");
+                }
+                else if (ConnectedPollID == "NONE" && ConnectedYTPoll == "NONE") {
                     clearInterval(CheckForPolls);
                     b("PleaseWait").style = "display: none;";
                     b("CreatePollEditor").style = "";
+                    b('Create').style = "";
+                    b('NewEditor').style = "display: none;";
+                    b('GetPresets').style = "display: none;";
                 }
             }, 250);
         }
 
-        const ListOfUnauthorizedUsers = ["\u0057\u0065\u0074\u0068\u0061\u006E"];
+        function SetYTPollRes(json) {
+            let Votes = [];
+            let Total = 0;
+            let arr = json.snippet.pollDetails.metadata.options;
+            for (let i = 0; i < arr.length; i++) {
+                const tally = arr[i].tally.replaceAll(',', "").replaceAll('.', "");
+                const votes = parseInt(tally);
+                if (isNaN(votes)) {
+                    console.error("[YT] Failed to parse tally for " + arr[i].optionText);
+                    Votes.push(0);
+                    continue;
+                }
+                Total += votes;
+                Votes.push(votes);
+            }
+            //console.log("DEBUG VOTES", Votes, Total);
+            SetYouTubePoll(Votes, Total);
+        }
 
         function processToken(token) {
             access_token = token;
-            window.addEventListener("message", (ev) => {
-                if (ev.data.MessageType == "editor_detailschange") {
-                    Editor_SetPollDetails(ev.data.PollQuestion, ev.data.PollOptions[0], ev.data.PollOptions[1], ev.data.PollOptions[2], ev.data.PollOptions[3]);
-                }
-                if (ev.data.MessageType == "Pong") {
-                    clearInterval(IntervalID);
-                    IntervalID = 0;
-                }
-                if (ev.data.MessageType == "OptionsAvailable") {
-                    console.log("[YT Poll] No poll is currently active.")
-                    ConnectedYTPoll = "NONE";
-                    if (ConnectedPollID == "NONE" && b("CurrentPoll").style.display == "none" && b("PleaseWait").style.display == "none" && b("CreatePollEditor").style.display == "none") {
-                        b("CreatePollEditor").style = "";
-                    }
-                }
-                if (ev.data.MessageType == "ActivePollAlready") {
-                    console.log("[YT Poll] Found a poll that's active.")
-                    ConnectedYTPoll = "CURRENTLY_ACTIVE";
-                }
-                if (ev.data.MessageType == "PollUpdateVotes") {
-                    SetYouTubePoll(ev.data.PollOptions, ev.data.TotalVotes);
-                }
-            });
             fetch(
                 'https://api.twitch.tv/helix/users',
                 {
@@ -677,15 +1044,6 @@
                     if (resp.error != undefined) {
                         return Promise.reject(resp.error + ": " + resp.message);
                     }
-                    if (resp.data[0] != null && ListOfUnauthorizedUsers.includes(resp.data[0].login)) {
-                        b("YTChatDocument").remove();
-                        b("TwitchChatDummyDoc").remove();
-                        b("YUHandler").remove();
-                        b('PleaseWait').style = "color: red;";
-                        b('PleaseWait').innerText = "You must request access to use this tool. Please get in touch with the website owner.";
-                        b("YouTubeConnection").querySelector("span").innerText = "Type your YouTube Stream URL in order to connect with YouTube.";
-                        return;
-                    }
                     if (window.location.hash.length > 0) window.location.hash = "#authorized";
                     localStorage.setItem("saved_access_token", token);
                     document.getElementById("AuthRequired").remove();
@@ -693,8 +1051,8 @@
                     SetPleaseWait("Waiting for YouTube & Twitch");
                     let Val = 0;
                     var CheckForPolls = setInterval(() => {
-                        if (b("TwitchChatDummyDoc").src == "about:blank" || b("YTChatDocument").src == "about:blank") {
-                            SetPleaseWait("Waiting for " + ((b("TwitchChatDummyDoc").src == "about:blank" && b("YTChatDocument").src == "about:blank") ? "YouTube & Twitch" : ((b("YTChatDocument").src == "about:blank") ? "YouTube" : "Twitch")));
+                        if (b("TwitchChatDummyDoc").src == "about:blank" || b("YTChatDummyDoc").src == "about:blank") {
+                            SetPleaseWait("Waiting for " + ((b("TwitchChatDummyDoc").src == "about:blank" && b("YTChatDummyDoc").src == "about:blank") ? "YouTube & Twitch" : ((b("YTChatDummyDoc").src == "about:blank") ? "YouTube" : "Twitch")));
                             return;
                         }
                         if (ConnectedPollID.length <= 0 && ConnectedYTPoll.length <= 0) {
@@ -712,16 +1070,19 @@
                             b("PleaseWait").style = "display: none;";
                             if (ConnectedPollID == "NONE" && ConnectedYTPoll == "NONE") {
                                 b("CreatePollEditor").style = "";
+                                b('Create').style = "";
+                                b('NewEditor').style = "display: none;";
+                                b('GetPresets').style = "display: none;";
                             }
                             if (ConnectedPollID != "NONE" && ConnectedYTPoll == "NONE") {
                                 b("PollWarning").style = "";
                                 getElementClass("PollWarningText").innerText = "You currently have an active poll for Twitch. Do you want to continue creating a multistreaming Poll & end Twitch poll?";
                             }
-                            if (ConnectedPollID == "NONE" && ConnectedYTPoll == "CURRENTLY_ACTIVE") {
+                            if (ConnectedPollID == "NONE" && ConnectedYTPoll != "NONE") {
                                 b("PollWarning").style = "";
                                 getElementClass("PollWarningText").innerText = "You currently have an active poll for YouTube. Do you want to continue creating a multistreaming Poll & end YouTube poll?";
                             }
-                            if (ConnectedPollID != "NONE" && ConnectedYTPoll == "CURRENTLY_ACTIVE") {
+                            if (ConnectedPollID != "NONE" && ConnectedYTPoll != "NONE") {
                                 b("PollWarning").style = "";
                                 getElementClass("PollWarningText").innerText = "You currently have an active poll for both platforms. Do you want to continue creating a multistreaming Poll & end both polls?";
                             }
@@ -737,9 +1098,9 @@
                         requestHooks(resp.data[0].id);
                     });
 
-                    socket_space.on('session_keepalive', () => {
-                        console.log("New Keepalive: " + new Date());
-                    });
+                    // socket_space.on('session_keepalive', () => {
+                    //     console.log("New Keepalive: " + new Date());
+                    // });
 
                     socket_space.on('channel.poll.begin', (msg) => {
                         let { metadata, payload } = msg;
@@ -785,9 +1146,31 @@
                         clearInterval(IntervalIDForPoll);
                         CalculateResults();
                         ConnectedPollID = "NONE";
-                        if (ConnectedYTPoll == "CURRENTLY_ACTIVE") {
-                            b("YTChatDocument").contentWindow.postMessage("Stop_Poll", "*");
-                        }
+                        // I realized that the poll results aren't finalized right away because the API has like a 2 second delay. We'll have to delay the request.
+                        setTimeout(() => {
+                            if (ConnectedYTPoll != "NONE" && ConnectedYTPoll != "ENDING") {
+                                fetch(`https://content-youtube.googleapis.com/youtube/v3/liveChat/messages/transition?part=snippet&id=${ConnectedYTPoll}&status=closed`, { // End the poll, no matter the response result...
+                                    "method": "POST",
+                                    "headers": {
+                                        "Authorization": "Bearer " + YTAccessToken,
+                                        "Accept": "application/json"
+                                    }
+                                }).then(async res => {
+                                    try {
+                                        ConnectedYTPoll = "NONE";
+                                        b("CreatePollEditor").style = "";
+                                        b('Create').style = "";
+                                        b('NewEditor').style = "display: none;";
+                                        b('GetPresets').style = "display: none;";
+                                        SetYTPollRes(await res.json());
+                                    } finally {
+                                        CalculateResults();
+                                    }
+                                }).catch(err => {
+                                    console.error(err);
+                                });
+                            }
+                        }, 2000);
                     });
                     socket_space.on('channel.channel_points_custom_reward_redemption.add', (msg) => {
                         let { metadata, payload } = msg;
@@ -832,16 +1215,18 @@
         var LAST_TIME = new Date();
 
         function CalculateResults() {
-            b("Res_PollOption3").style = PE_O[2].length > 0 ? "" : "display: none;";
-            b("Res_PollOption4").style = PE_O[3].length > 0 ? "" : "display: none;";
+            b("Res_PollOption3").style = PE_O.length >= 3 ? "" : "display: none;";
+            b("Res_PollOption4").style = PE_O.length >= 4 ? "" : "display: none;";
+            b("Res_PollOption5").style = PE_O.length >= 5 ? "" : "display: none;";
             if ((typeof TwitchPoll === 'object' && TwitchPoll != null) && (typeof YouTubePoll === 'object' && YouTubePoll != null)) {
                 b('PollResultsDiv').open = true;
                 b("RPOpt1_TTV").parentElement.style = "display: flex;";
                 b("RPOpt2_TTV").parentElement.style = "display: flex;";
-                b("RPOpt3_TTV").parentElement.style = PE_O[2].length > 0 ? "display: flex;" : "display: flex; display: none;";
-                b("RPOpt4_TTV").parentElement.style = PE_O[3].length > 0 ? "display: flex;" : "display: flex; display: none;";
+                b("RPOpt3_TTV").parentElement.style = PE_O.length >= 3 ? "display: flex;" : "display: flex; display: none;";
+                b("RPOpt4_TTV").parentElement.style = PE_O.length >= 4 ? "display: flex;" : "display: flex; display: none;";
+                b("RPOpt5_TTV").parentElement.style = PE_O.length >= 5 ? "display: flex;" : "display: flex; display: none;";
 
-                var CombinedVotes = Array((PE_O[2].length > 0 && PE_O[3].length > 0) ? 4 : ((PE_O[2].length > 0 || PE_O[3].length > 0) ? 3 : 2));
+                var CombinedVotes = Array(PE_O.length);
                 var TwitchTotalVotes = 0;
                 const YouTubeTotalVotes = YouTubePoll["Total"];
                 for (let i = 0; i < TwitchPoll["votes"].length; i++) {
@@ -899,7 +1284,7 @@
                 'client_id': '597860444523-l87m271jorgmc0a9ea2vnn4ohqkmjphi.apps.googleusercontent.com',
                 'redirect_uri': (() => { let str = window.location.href; if (str.includes('?')) { str = str.split('?')[0]; } if (str.includes('#')) { str = str.split('#')[0]; } return str; })(),
                 'response_type': 'token',
-                'scope': 'https://www.googleapis.com/auth/youtube.readonly',
+                'scope': 'https://www.googleapis.com/auth/youtube.force-ssl',
                 'include_granted_scopes': 'true',
                 'state': 'yt35hv1'
             };
@@ -1078,7 +1463,7 @@
             PE_O[2] = Option3;
             PE_O[3] = Option4;
         }
-
+        Editor_SetPollDetails();
     </script>
 </body>
 
