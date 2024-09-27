@@ -132,7 +132,8 @@
             <div id="PPollDuration" class="PollProgressBar RedColor"></div>
         </div>
         <p id="PollDuration">00:00</p>
-        <button class="SubmitPoll" onclick="EndPollEarly(false)" oncontextmenu="event.preventDefault(); EndPollEarly(true);">End Polls Early</button>
+        <button class="SubmitPoll" onclick="EndPollEarly(false)"
+            oncontextmenu="event.preventDefault(); EndPollEarly(true);">End Polls Early</button>
     </div>
 
     <div id="PleaseWait" style="display: none;">
@@ -329,15 +330,21 @@
             }
 
             if (myParam != null && isYouTube) {
+                if (urlParams.get('refresh_token') != null) {
+                    InitRefresh(urlParams.get('refresh_token'), parseInt(urlParams.get('expires_in')));
+                }
                 verifyYTToken(myParam);
             }
             else if (localStorage.getItem('ytsavedtoken') != null) {
+                if (localStorage.getItem('ytrefresh') != null) {
+                    InitRefresh(localStorage.getItem('ytrefresh'), -1);
+                }
                 verifyYTToken(localStorage.getItem('ytsavedtoken'));
             }
             else {
                 b('YouTubeConnection').innerHTML = "YouTube Authentication is required to continue.";
                 if (access_token.length > 0) {
-                    b("AuthRequired").getElementsByTagName('span')[0].innerText = "Success! Now, you'll to authenticate your YouTube account. Please remember we are only using the Google API for this tool, and we will NOT use it for any other purpose. Since there is no specific permission, we have to ask this following scope which is the least we can do (PLEASE REMEMBER THAT WE ONLY USE THIS TO CREATE POLLS/GET RECENT BROADCASTS):";
+                    b("AuthRequired").getElementsByTagName('span')[0].innerText = "Success! Now, you'll need to authenticate your YouTube account. Please remember we are only using the Google API for this tool, and we will NOT use it for any other purpose. Since there is no specific permission, we have to ask this following scope which is the least we can do (PLEASE REMEMBER THAT WE ONLY USE THIS TO CREATE POLLS/GET RECENT BROADCASTS):";
                     b("AuthRequired").getElementsByTagName('span')[0].style.fontSize = "16px";
                     b("AuthRequired").className = "Oops";
                     let bullet = document.createElement('ul');
@@ -346,11 +353,59 @@
                     b("AuthRequired").insertBefore(bullet, document.getElementById('authorize'));
                     b("AuthRequired").style.display = "";
                     document.getElementById('authorize').innerText = "Authorize YouTube (I acknowledge what I read above)"
-                    document.getElementById('authorize').onclick = (ev) => { if (confirm("We will ask the permission that we specified. It'll be only used to function this tool. IT WILL NOT BE USED FOR ANY OTHER PURPOSE. In addition, token resets every hour so we'll need to ask you again if you want to continue using this tool. Continue?")) YoutubeLinkHandler(); };
+                    document.getElementById('authorize').onclick = (ev) => { if (confirm("We will ask the permission that we specified. It'll be only used to function this tool. IT WILL NOT BE USED FOR ANY OTHER PURPOSE. Continue?")) YoutubeLinkHandler(); };
                     document.body.insertBefore(b('AuthRequired').cloneNode(true), document.body.firstChild);
                     b("AuthRequired").style.display = "none";
                 }
             }
+        }
+
+        function InitRefresh(rt, timeout = -1) {
+            if (timeout === -1) {
+                try {
+                    let TIME = ((new Date(localStorage.getItem('ytexpiresin')).getTime() - new Date().getTime())) - 20000;
+                    if (TIME < 0) TIME = 0;
+                    console.log("[YT] Token expires in " + (TIME / 1000))
+                    setTimeout(() => { Refresh(rt); }, TIME);
+                } catch (error) {
+                    console.error(error);
+                }
+                return;
+            }
+            localStorage.setItem('ytexpiresin', new Date(new Date().setSeconds(new Date().getSeconds() + timeout)).toString());
+            localStorage.setItem('ytrefresh', rt);
+            console.log("[YT] Token expires in " + timeout)
+            setTimeout(() => { Refresh(rt); }, (timeout * 1000) - 20000);
+        }
+
+        function Refresh(rt) {
+            localStorage.removeItem('ytexpiresin');
+            localStorage.removeItem('ytrefresh');
+            return fetch('https://seenwalex.wixsite.com/chat-live/_functions/GAPI/Refresh', {
+                "method": "POST",
+                "headers": {
+                    "Content-Type": "application/json"
+                },
+                "body": JSON.stringify({
+                    "t": rt
+                })
+            }).then(res => {
+                if (!res.ok) {
+                    if (confirm("We are unable to reverify you automatically. Manual?")) {
+                        ReverifyPrompt(() => { });
+                    }
+                }
+                return res.json();
+            }).then(res => {
+                if (res.access_token) {
+                    InitRefresh(rt, res.expires_in);
+                    if (localStorage.getItem('ytsavedtoken') == null) { setTimeout(() => { location.reload(); }, 250); }
+                    localStorage.setItem("ytsavedtoken", res.access_token);
+                    YTAccessToken = res.access_token;
+                    return true;
+                }
+                return false;
+            });
         }
 
         function ShowPresets() {
@@ -672,7 +727,7 @@
                     console.error("YouTube Authentication Failed: ", err);
                     localStorage.removeItem('ytsavedtoken');
                     b('YouTubeConnection').innerHTML = "YouTube Authentication is required to continue.";
-                    document.body.insertAdjacentHTML('beforebegin', `<ul id="AuthRequired2" style="padding: 3px; border-radius: 6px; border: thick solid; position: relative;" class="Oops"><img src="./cdn/HmmNotes-On_a_stack-7tv.gif"><span style="font-size: 16px; position: absolute; left: 110px; font-size: 24px;">Every hour, we need to reverify you to continue using this tool. Please visit the link again to reauthorize. Remember that we ONLY use the API for this tool:</span><button id="authorize" style="position: absolute; left: 110px; top: 65px; width: 92%;">Authorize YouTube (I acknowledge what I read above)</button></ul>`)
+                    document.body.insertAdjacentHTML('beforebegin', `<ul id="AuthRequired2" style="padding: 3px; border-radius: 6px; border: thick solid; position: relative;" class="Oops"><img src="./cdn/HmmNotes-On_a_stack-7tv.gif"><span style="font-size: 16px; position: absolute; left: 110px; font-size: 24px;">Uh oh, we need to reverify you. Please visit the link again to reauthorize. Remember that we ONLY use the API for this tool:</span><button id="authorize" style="position: absolute; left: 110px; top: 65px; width: 92%;">Authorize YouTube (I acknowledge what I read above)</button></ul>`)
                     document.getElementById('authorize').onclick = (ev) => { YoutubeLinkHandler(); };
                 });
         }
@@ -853,6 +908,7 @@
                     clearInterval(CheckForPolls);
                     b("PleaseWait").style = "display: none;";
                     b("CurrentPoll").style = "";
+                    UpdatePollResponses();
                     window.scrollTo(0, document.body.scrollHeight);
                     IntervalIDForPoll = setInterval(UpdatePollResponses, 150);
                     // PollStarttime = new Date();
@@ -1278,11 +1334,13 @@
             // Parameters to pass to OAuth 2.0 endpoint.
             var params = {
                 'client_id': '597860444523-l87m271jorgmc0a9ea2vnn4ohqkmjphi.apps.googleusercontent.com',
-                'redirect_uri': (() => { let str = window.location.href; if (str.includes('?')) { str = str.split('?')[0]; } if (str.includes('#')) { str = str.split('#')[0]; } return str; })(),
-                'response_type': 'token',
+                'redirect_uri': 'https://seenwalex.wixsite.com/chat-live/_functions/Red',
+                'response_type': 'code',
+                'access_type': 'offline',
                 'scope': 'https://www.googleapis.com/auth/youtube.force-ssl',
                 'include_granted_scopes': 'true',
-                'state': 'yt35hv1'
+                'state': 'yt35hv1',
+                'prompt': 'consent'
             };
 
             // Add form parameters as hidden input values.
