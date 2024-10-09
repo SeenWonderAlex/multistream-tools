@@ -284,11 +284,6 @@
                 else {
                     b("TwitchFindButton").innerText = "Change";
                     b("TwitchFindButton").style.width = "76px";
-                    if (SAVED_ACCESS_KEY.length <= 0) // No access key
-                    {
-                        processToken(item.access); // Get the already decrypted data then
-                        return;
-                    }
                     const DECRYPTED_STR = await decryptData(item.access, SAVED_ACCESS_KEY); // Decrypting FROM ONLY THE USER INPUT KEY. ON THE USER'S DEVICE.
                     if ((DECRYPTED_STR || "FAILED") == "FAILED") {
                         return Promise.reject("This seems to be the wrong access key.");
