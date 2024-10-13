@@ -14,11 +14,12 @@
                 localStorage.setItem('ytsavedtoken', token);
                 if (window.opener) {
                     window.opener.postMessage({ "type": "REVERIFIED", "retrieved": token }, "*");
-                    let span = document.createElement('span');
-                    span.innerText = "You may close this tab!";
-                    document.body.append(span);
                     window.close();
+                    return;
                 }
+                let span = document.createElement('span');
+                span.innerText = "You may close this tab!";
+                document.body.append(span);
             })
             .catch(err => {
                 console.error("YouTube Authentication Failed: " + JSON.stringify(err));
