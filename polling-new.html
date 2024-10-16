@@ -461,8 +461,8 @@
         // Check availability...
         function ValidatePollOptions() {
             const count = b('EditorOptions').childElementCount;
-            b('NewEditor').querySelector("button[type=submit]").disabled = count < 2 || count > 5;
-            return count >= 2 && count <= 5;
+            b('NewEditor').querySelector("button[type=submit]").disabled = count < 2 || count > 4;
+            return count >= 2 && count <= 4;
         }
 
         // Save Presets to local storage
@@ -821,8 +821,8 @@
                 if (OptionInputs[i].value.length > 0) Options.push(OptionInputs[i].value);
             }
             PE_O = Options;
-            if (PE_O.length < 2 || PE_O.length > 5) {
-                alert("A poll must have 2-5 options.");
+            if (PE_O.length < 2 || PE_O.length > 4) {
+                alert("A poll must have 2-4 options.");
                 return;
             }
             SubmitPoll();
