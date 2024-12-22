@@ -574,7 +574,7 @@ function verifyYTToken(token) {
             b("CB_YT").addEventListener("click", OnUpdateCheckboxes);
             OnUpdateCheckboxes(null);
             PlatformsConnected.push("YouTube");
-
+            if (window.location.hash.length > 0) window.location.hash = "#authorized";
             // Disconnect
             getElementClass("Platform2").disabled = false;
             getElementClass("Platform2").classList.add("disconnect");
