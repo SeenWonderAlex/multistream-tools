@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
     handleSavedToken();
 });
 
-function handleSavedToken() {
+async function handleSavedToken() {
     const urlParams = new URLSearchParams(window.location.hash.replace('#', '?'));
     const myParam = urlParams.get('access_token');
     const StateMatch = verifyState(urlParams.get('state'));
@@ -39,7 +39,7 @@ function handleSavedToken() {
         getElementClass("Platform1").disabled = true;
         processToken(myParam);
     }
-    else if (localStorage.getItem('saved_access_token') != null) {
+    else if ((localStorage.getItem('saved_access_token')) != null) {
         IsConnectingToAccount = true;
         getElementClass("Platform1").disabled = true;
         processToken(localStorage.getItem('saved_access_token'));
@@ -91,19 +91,19 @@ function handleSavedToken() {
         } else verifyYTToken(myParam);
         getElementClass("Platform2").disabled = true;
     }
-    else if (localStorage.getItem('ytsavedtoken') != null) {
+    else if ((await EncStorage.getItem('ytsavedtoken')) != null) {
         IsConnectingToAccount = true;
         b('YouTubeConnection').style.display = "";
-        if (localStorage.getItem('ytrefresh') != null) {
-            InitRefresh(localStorage.getItem('ytrefresh'), -1)
-                .then((v) => {
+        if ((await EncStorage.getItem('ytrefresh')) != null) {
+            InitRefresh((await EncStorage.getItem('ytrefresh')), -1)
+                .then(async (v) => {
                     if (!v) return Promise.reject("You must verify again to continue with YouTube");
-                    verifyYTToken(localStorage.getItem('ytsavedtoken'));
-                }).catch(err => {
+                    verifyYTToken((await EncStorage.getItem('ytsavedtoken')));
+                }).catch(async err => {
                     console.error(err);
-                    verifyYTToken(localStorage.getItem('ytsavedtoken'));
+                    verifyYTToken((await EncStorage.getItem('ytsavedtoken')));
                 });
-        } else verifyYTToken(localStorage.getItem('ytsavedtoken'));
+        } else verifyYTToken((await EncStorage.getItem('ytsavedtoken')));
         getElementClass("Platform2").disabled = true;
     }
     else {
@@ -138,7 +138,7 @@ function InitRefresh(rt, timeout = -1) {
         return Promise.resolve(false);
     }
     localStorage.setItem('ytexpiresin', new Date(new Date().setSeconds(new Date().getSeconds() + timeout)).toString());
-    localStorage.setItem('ytrefresh', rt);
+    EncStorage.setItem('ytrefresh', rt);
     console.log("[YT] Token expires in " + timeout)
     if (((timeout * 1000) - 20000) <= 0) {
         return Refresh(rt);
@@ -149,7 +149,7 @@ function InitRefresh(rt, timeout = -1) {
 
 function Refresh(rt) {
     localStorage.removeItem('ytexpiresin');
-    localStorage.removeItem('ytrefresh');
+    EncStorage.removeItem('ytrefresh');
     return fetch('https://seenwalex.wixsite.com/chat-live/_functions/GAPI/Refresh', {
         "method": "POST",
         "headers": {
@@ -163,11 +163,11 @@ function Refresh(rt) {
             return Promise.reject("You must verify again to continue with YouTube.");
         }
         return res.json();
-    }).then(res => {
+    }).then(async res => {
         if (res.access_token) {
             InitRefresh(rt, res.expires_in);
-            if (localStorage.getItem('ytsavedtoken') == null) { setTimeout(() => { location.reload(); }, 250); }
-            localStorage.setItem("ytsavedtoken", res.access_token);
+            if ((await EncStorage.getItem('ytsavedtoken')) == null) { setTimeout(() => { location.reload(); }, 250); }
+            EncStorage.setItem("ytsavedtoken", res.access_token);
             YTAccessToken = res.access_token;
             return Promise.resolve(true);
         }
@@ -539,18 +539,18 @@ function ReverifyPrompt(event) {
     if (!win || win.closed || typeof win.closed == 'undefined') {
         //POPUP BLOCKED
         alert("Uh oh! We gotta re-verify you. Open the popup that was blocked from your blocker and you'll be prompt to reverify.");
-        let i = setInterval(() => {
-            if (localStorage.getItem('ytsavedtoken') != null) {
-                YTAccessToken = localStorage.getItem('ytsavedtoken');
+        let i = setInterval(async () => {
+            if ((await EncStorage.getItem('ytsavedtoken')) != null) {
+                YTAccessToken = (await EncStorage.getItem('ytsavedtoken'));
                 event();
                 clearInterval(i);
             }
         }, 1000);
     } else {
-        let onmessage = (ev) => {
+        let onmessage = async(ev) => {
             if (typeof ev.data === "object" && ev.data.type == "REVERIFIED") {
-                localStorage.setItem('ytsavedtoken', ev.data.retrieved);
-                YTAccessToken = localStorage.getItem('ytsavedtoken');
+                await EncStorage.setItem('ytsavedtoken', ev.data.retrieved);
+                YTAccessToken = ev.data.retrieved;
                 event();
                 window.removeEventListener('message', onmessage);
             }
@@ -677,12 +677,12 @@ function verifyYTToken(token) {
                     setTimeout(() => { b('YUHandler').innerText = "Load from Recent"; }, 3000);
                 }
             };
-            localStorage.setItem('ytsavedtoken', token);
+            EncStorage.setItem('ytsavedtoken', token);
         })
         .catch(err => {
             ConnectedYTPoll = "NONE";
             console.error("YouTube Authentication Failed: ", err);
-            localStorage.removeItem('ytsavedtoken');
+            EncStorage.removeItem('ytsavedtoken');
             b('YouTubeConnection').innerHTML = "We could not re-authenticate YouTube.";
             getElementClass("Platform2").disabled = false;
             getElementClass("Platform2").addEventListener('click', YoutubeLinkHandler);
@@ -1184,7 +1184,6 @@ const AddChecker = () => {
         }
         if (ConnectedPollID.length > 0 && ConnectedYTPoll.length <= 0) {
             SetPleaseWait("Checking active polls for YouTube");
-            Val++;
         }
         if (ConnectedPollID.length <= 0 && ConnectedYTPoll.length > 0) {
             SetPleaseWait("Checking active polls for Twitch");
