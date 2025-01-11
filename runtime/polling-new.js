@@ -167,7 +167,7 @@ function Refresh(rt) {
         if (res.access_token) {
             InitRefresh(rt, res.expires_in);
             if ((await EncStorage.getItem('ytsavedtoken')) == null) { setTimeout(() => { location.reload(); }, 250); }
-            EncStorage.setItem("ytsavedtoken", res.access_token);
+            await EncStorage.setItem("ytsavedtoken", res.access_token);
             YTAccessToken = res.access_token;
             return Promise.resolve(true);
         }
