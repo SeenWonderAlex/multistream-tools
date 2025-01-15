@@ -86,9 +86,9 @@
 <body>
     <ul id="AuthRequired" style="display: none;">
         <img src="./cdn/HmmNotes-On_a_stack-7tv.gif">
-        <span>Let's get you to authorize this website! We'll ask you to approve some permissions as well the app itself.
+        <span>Let's get you to connect yuor account! We'll ask you to approve some permissions as well the app itself.
             You can always revoke our permissions later in your Twitch settings.</span>
-        <button id="authorize">Authorize Twitch</button>
+        <button id="authorize">Connect</button>
     </ul>
     <div></div>
     <div id="Dropdowns">
@@ -159,7 +159,13 @@
             return document.getElementById(Id);
         }
 
-        document.getElementById('authorize').onclick = (ev) => { location.href = 'https://id.twitch.tv/oauth2/authorize?client_id=' + client_id + '&redirect_uri=' + encodeURIComponent(redirect) + '&response_type=token&scope=chat:read+channel:moderate+moderation:read+channel:read:redemptions+channel:manage:polls+channel:read:polls+moderator:read:chat_settings' };
+        document.getElementById('authorize').onclick = (ev) => {
+            location.href = 'https://id.twitch.tv/oauth2/authorize?client_id=' + client_id + '&redirect_uri=' + encodeURIComponent(redirect) + '&response_type=token&scope=channel:read:redemptions+channel:manage:polls+channel:read:polls'
+        };
+        document.getElementById('authorize').oncontextmenu = (ev) => {
+            ev.preventDefault();
+            location.href = 'https://id.twitch.tv/oauth2/authorize?client_id=' + client_id + '&redirect_uri=' + encodeURIComponent(redirect) + '&response_type=token&scope=channel:read:redemptions&force_verify=true'
+        }
         document.addEventListener('DOMContentLoaded', () => {
             handleSavedToken();
         });
@@ -276,8 +282,7 @@
                         select.appendChild(opt);
                     });
                     select.addEventListener('change', OnChangeReward);
-                    if (reward_id == "ALL_MONITORED")
-                    {
+                    if (reward_id == "ALL_MONITORED") {
                         LoadRedemptions(); // Reload to show buttons
                     }
                 })
@@ -748,7 +753,7 @@
                         Text = "Are you in the right page? We are unable to complete this process. Feel free to try again or reopen this page from the source.";
                     }
                     b("AuthRequired").getElementsByTagName('span')[0].innerText = Text;
-                    b("authorize").innerText = "Reauthorize Twitch";
+                    b("authorize").innerText = "Re-connect Twitch";
                 }
                 document.getElementById("AuthRequired").style = '';
             }
