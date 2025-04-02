@@ -20,6 +20,10 @@ var POLL_TYPE = "";
 
 var PlatformsConnected = [];
 
+var CapWarning = document.querySelector(".CapWarning");
+
+var MaxLength_Choice = 35;
+
 document.getElementById("authorize").addEventListener('click', (ev) => { b("AuthRequired").style.display = "none"; });
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -188,27 +192,64 @@ function ShowNewPoll() {
     b('GetPresets').style = "display: none;";
 }
 
+let CapWarningVisible = false;
+
+function SetupQuestionCapWarning() {
+    b("Editor_PollQuestion").addEventListener('input', (ev => {
+        const str = ev.target.value.trim();
+        const Length = 60;
+        if (POLL_TYPE !== "TTV" && str.length > Length) {
+            CapWarning.style = "";
+            CapWarning.querySelector('span').innerText = "Twitch will trim to " + str.substring(0, Length);
+            CapWarningVisible = true;
+        }
+        else if (CapWarningVisible) {
+            CapWarningVisible = false;
+            CapWarning.style = "display: none;";
+        }
+    }));
+}
+
+SetupQuestionCapWarning();
+
+function GetOptionCount() { return document.querySelectorAll("#EditorOptions > .option").length; };
+
 function AddOption() {
     const Options = b('EditorOptions');
     const option = document.createElement('div');
     const button = document.createElement('button');
     const input = document.createElement('input');
-    option.style.display = "flex";
+    option.className = "option";
     button.style = "width: 25px; float: left; height: 25px; background: none;";
     button.innerText = "X";
     button.type = "button";
     button.tabIndex = 1;
     input.type = "text";
     input.className = "YU1";
-    input.placeholder = "Choice " + (Options.childElementCount + 1);
+    input.placeholder = "Choice " + (GetOptionCount() + 1);
+    input.maxLength = MaxLength_Choice;
     input.style.width = "100%";
     option.append(button);
     option.append(input);
+    var Warning = CapWarning.cloneNode(true);
+    var WarningShown = false;
+    input.addEventListener('input', (ev) => {
+        var str = ev.target.value.trim();
+        if (str.length >= 25) {
+            if (!WarningShown) { Warning.style = ""; Options.insertBefore(Warning, option.nextSibling); }
+            Warning.querySelector("span").innerText = "Twitch will trim to " + str.substring(0, 25);
+            WarningShown = true;
+        }
+        else if (WarningShown) {
+            WarningShown = false;
+            Warning.remove();
+        }
+    });
     button.addEventListener('click', () => {
-        if (b('EditorOptions').childElementCount <= 2) return; // Can't remove less than 2 options.
+        if (GetOptionCount() <= 2) return; // Can't remove less than 2 options.
         option.remove();
         ValidatePollOptions();
-        const OptionsList = b('EditorOptions').children;
+        const OptionsList = document.querySelectorAll("#EditorOptions > .option");
         try {
             for (let i = 0; i < OptionsList.length; i++) {
                 if (i <= 1) {
@@ -219,6 +260,10 @@ function AddOption() {
         } catch (error) {
             console.error(error);
         }
+
+        if (WarningShown) Warning.remove();
+        delete WarningShown;
+        Warning = null;
     });
     Options.append(option);
     ValidatePollOptions();
@@ -547,7 +592,7 @@ function ReverifyPrompt(event) {
             }
         }, 1000);
     } else {
-        let onmessage = async(ev) => {
+        let onmessage = async (ev) => {
             if (typeof ev.data === "object" && ev.data.type == "REVERIFIED") {
                 await EncStorage.setItem('ytsavedtoken', ev.data.retrieved);
                 YTAccessToken = ev.data.retrieved;
@@ -789,7 +834,7 @@ function SubmitPoll() {
         let Options = [];
         for (var i = 0; i < PE_O.length; i++) {
             if (PE_O[i].length > 0) {
-                Options.push({ "title": PE_O[i].substring(0, 25) });
+                Options.push({ "title": PE_O[i].trim().substring(0, 25) });
             }
         }
         if (isNaN(Number.parseInt(b("Editor_PollDuration").value))) b("Editor_PollDuration").value = "60";
@@ -805,7 +850,7 @@ function SubmitPoll() {
                 },
                 "body": JSON.stringify({
                     "broadcaster_id": user_id,
-                    "title": PE_Q.substring(0, 60),
+                    "title": PE_Q.trim().substring(0, 60),
                     "choices": Options,
                     "duration": Number.parseInt(b("Editor_PollDuration").value)
                 })
@@ -839,7 +884,7 @@ function SubmitPoll() {
         Options = [];
         for (var i = 0; i < PE_O.length; i++) {
             if (PE_O[i].length > 0) {
-                Options.push({ "optionText": PE_O[i].substring(0, 35) });
+                Options.push({ "optionText": PE_O[i].trim().substring(0, 35) });
             }
         }
         fetch('https://www.googleapis.com/youtube/v3/liveChat/messages?part=snippet', { // No need for data, just IDs.
@@ -849,7 +894,7 @@ function SubmitPoll() {
                 "Accept": "application/json"
             },
             "body": JSON.stringify({
-                "snippet": { "liveChatId": YTChatID, "type": "pollEvent", "pollDetails": { "metadata": { "options": Options, "questionText": PE_Q.substring(0, 100) } } }
+                "snippet": { "liveChatId": YTChatID, "type": "pollEvent", "pollDetails": { "metadata": { "options": Options, "questionText": PE_Q.trim().substring(0, 100) } } }
             })
         }).then(res => {
             if (res.status == 401) {
@@ -1139,6 +1184,7 @@ function OnUpdateCheckboxes(ev) {
         if (document.querySelector("option[value=\"Infinity\"]")) {
             document.querySelector("option[value=\"Infinity\"]").remove();
         }
+        UpdateCharLength(100, 35);
     }
     else if (Checked_1) {
         POLL_TYPE = "YT";
@@ -1148,17 +1194,28 @@ function OnUpdateCheckboxes(ev) {
             option.innerText = "Until the end of stream";
             b("Editor_PollDuration").append(option);
         }
+        UpdateCharLength(100, 35);
     }
     else if (Checked_2) {
         POLL_TYPE = "TTV";
         if (document.querySelector("option[value=\"Infinity\"]")) {
             document.querySelector("option[value=\"Infinity\"]").remove();
         }
+        UpdateCharLength(60, 25);
     }
     else if (ev != null) {
         ev.preventDefault();
     }
     ValidatePollOptions();
+}
+
+function UpdateCharLength(Question = 100, Choice = 35) {
+    MaxLength_Choice = Choice;
+    b("Editor_PollQuestion").maxLength = Question;
+    let Choices = document.querySelectorAll("#EditorOptions > div > input");
+    for (let choice of Choices) {
+        choice.maxLength = Choice;
+    }
 }
 
 var CheckForPolls = undefined;
@@ -1228,6 +1285,9 @@ function processToken(token) {
         .then(resp => {
             if (resp.error != undefined) {
                 return Promise.reject(resp.error + ": " + resp.message);
+            }
+            if (resp.data[0].broadcaster_type === "") {
+                return Promise.reject("not_a_affiliate");
             }
             if (window.location.hash.length > 0) window.location.hash = "#authorized";
             if (document.querySelectorAll("#ConnectedPlatforms > span")[0]) {
@@ -1441,10 +1501,18 @@ function processToken(token) {
             log('Error with Users Call');
             localStorage.removeItem("saved_access_token");
             document.getElementById("AuthRequired").style = '';
-            b("AuthRequired").className = "Oops";
-            b("AuthRequired").getElementsByTagName('img')[0].src = './cdn/Weirdge-perry8782-7tv.gif';
-            b("AuthRequired").getElementsByTagName('span')[0].innerText = "We could not access your Twitch account anymore. " + err;
-            b("authorize").innerText = "Dismiss";
+            if (err === "not_a_affiliate") {
+                b("AuthRequired").className = "Oops";
+                b("AuthRequired").getElementsByTagName('img')[0].src = './cdn/Weirdge-perry8782-7tv.gif';
+                b("AuthRequired").getElementsByTagName('span')[0].innerText = "We're sorry, but this account doesn't have access to create polls. Check your achievements to see how far you're from affiliate.";
+                b("authorize").innerText = "Dismiss";
+            }
+            else {
+                b("AuthRequired").className = "Oops";
+                b("AuthRequired").getElementsByTagName('img')[0].src = './cdn/Weirdge-perry8782-7tv.gif';
+                b("AuthRequired").getElementsByTagName('span')[0].innerText = "We could not access your Twitch account anymore. " + err;
+                b("authorize").innerText = "Dismiss";
+            }
 
             getElementClass("Platform1").disabled = false;
             getElementClass("Platform1").addEventListener('click', (ev) => {

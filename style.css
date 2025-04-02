@@ -409,6 +409,16 @@ hr {
     border-width: 1px;
 }
 
+#EditorOptions > .option
+{
+    display: flex;
+}
+
+.CapWarning > span {
+ color: #d4b115;
+ font-size: 13px;
+}
+
 #AuthRequired {
     background-color: rgb(112, 0, 132);
     padding: 3px;
