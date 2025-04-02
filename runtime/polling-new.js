@@ -272,7 +272,7 @@ function AddOption() {
 
 // Check availability...
 function ValidatePollOptions() {
-    const count = b('EditorOptions').childElementCount;
+    const count = document.querySelectorAll("#EditorOptions > div[data='option']");
     b('NewEditor').querySelector("button[type=submit]").disabled = count < 2 || count > (POLL_TYPE === "TTV" ? 5 : 4);
     return count >= 2 && count <= (POLL_TYPE === "TTV" ? 5 : 4);
 }
