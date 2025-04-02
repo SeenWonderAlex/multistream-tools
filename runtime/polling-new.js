@@ -235,7 +235,7 @@ function AddOption() {
     var WarningShown = false;
     input.addEventListener('input', (ev) => {
         var str = ev.target.value.trim();
-        if (str.length >= 25) {
+        if (str.length > 25) {
             if (!WarningShown) { Warning.style = ""; Options.insertBefore(Warning, option.nextSibling); }
             Warning.querySelector("span").innerText = "Twitch will trim to " + str.substring(0, 25);
             WarningShown = true;
