@@ -957,7 +957,7 @@ function AnimateScrollButton() {
 document.querySelector('#Messages').addEventListener('scroll', (ev) => {
     const MessagesList = document.querySelector('#Messages');
     const DistanceToBottom = Math.abs(MessagesList.scrollHeight - MessagesList.scrollTop - MessagesList.clientHeight);
-    if (DistanceToBottom < 1) {
+    if (DistanceToBottom < 10) {
         IsAtTheBottom = true;
     }
     else if (BottomDelay <= performance.now()) {
