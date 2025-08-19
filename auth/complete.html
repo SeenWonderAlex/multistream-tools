@@ -1,0 +1,151 @@
+<html>
+
+<head>
+    <title>Please Wait...</title>
+</head>
+
+<body>
+    <style>
+        body,
+        input,
+        select,
+        dialog {
+            background: rgb(26, 26, 26);
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+    <script type="text/javascript" src="../runtime/utils/encryption.js"></script>
+    <script type="text/javascript" src="../runtime/utils/src-5fa9F4.js"></script>
+    <script>
+        let a;
+
+        const bufferToBase64 = (input) => {
+            const arr = new Uint8Array(input);
+            const b = btoa(String.fromCharCode(...Array.from(arr))).replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=/g, '');
+            return b;
+        };
+
+        function getRandomString(i = 8) {
+            const randomValues = new Uint32Array(i);
+            window.crypto.getRandomValues(randomValues);
+
+            // Encode as UTF-8
+            const utf8Encoder = new TextEncoder();
+            const utf8Array = utf8Encoder.encode(
+                String.fromCharCode.apply(null, randomValues)
+            );
+
+            // Base64 encode the UTF-8 data
+            return btoa(String.fromCharCode.apply(null, utf8Array))
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=+$/, '');
+        }
+
+        const RedirectTo = localStorage.getItem("RedirectTo");
+        if (RedirectTo === null) {
+            location.replace("../");
+            throw new Error("None");
+        }
+
+        if (location.hash.length > 0) {
+            const urlParams = new URLSearchParams(window.location.hash.replace('#', '?'));
+            location.hash = "#pleasewait";
+            const state = urlParams.get('state');
+            const CheckAndMatch = localStorage.getItem('state') === state;
+            localStorage.removeItem('state');
+            localStorage.removeItem("RedirectTo");
+            if (!CheckAndMatch) {
+                location.replace("../");
+            }
+            else {
+                (async function () {
+                    if (RedirectTo === "app") {
+                        // TODO: add success message
+                        location.hash = "#success";
+                        location = "http://127.0.0.1:5934/?" + urlParams.toString();
+                        throw new Error("Success!");
+                    }
+                    if (state.startsWith("ttv")) {
+                        await EncStorage.setItem("saved_access_token", urlParams.get("access_token"));
+                        await EncStorage.setItem("saved_refresh_token", urlParams.get("refresh_token"));
+                        fetch("https://id.twitch.tv/oauth2/validate", {
+                            "headers": {
+                                "Authorization": "OAuth " + urlParams.get("access_token")
+                            }
+                        }).then(async res => {
+                            if (res.ok) {
+                                localStorage.setItem('saved_expiresin', new Date(new Date().setSeconds(new Date().getSeconds() + parseInt(urlParams.get("expires_in")))).toString());
+                                location.replace(RedirectTo);
+                            }
+                            else {
+                                EncStorage.removeItem("saved_access_token");
+                                EncStorage.removeItem("saved_refresh_token");
+                                location.replace("error?message=" + encodeURIComponent("Bug Report: Access Token from authentication server is invalid."));
+                            }
+                        });
+                    }
+                    else if (state.startsWith("yt")) {
+                        await EncStorage.setItem("ytsavedtoken", urlParams.get("access_token"));
+                        await EncStorage.setItem("ytrefresh", urlParams.get("refresh_token"));
+                        localStorage.setItem('ytexpiresin', new Date(new Date().setSeconds(new Date().getSeconds() + parseInt(urlParams.get("expires_in")))).toString());
+
+                        location.replace(RedirectTo);
+                    }
+                })();
+            }
+        }
+        else {
+            const search = new URLSearchParams(location.search);
+            if (search.has('code')) {
+                const code = search.get("code");
+                const stateCheck = search.get("state");
+                if (localStorage.getItem("kstate") != null && stateCheck === localStorage.getItem("kstate")) {
+                    const cc = localStorage.getItem("kverifier");
+                    fetch("https://seenwalex.wixsite.com/chat-live/_functions/KickAPI/GrantAuthorizationCode", {
+                        "method": "POST",
+                        "headers": {
+                            "Content-Type": "application/json"
+                        },
+                        "body": JSON.stringify({
+                            code_verifier: cc,
+                            code: code,
+                            redirect_uri: location.protocol + "//" + location.host + location.pathname
+                        })
+                    })
+                        .then(res => {
+                            if (!res.ok) {
+                                return Promise.reject("Invalid");
+                            }
+                            return res.json();
+                        }).then(async json => {
+                            await EncStorage.setItem('kkactoken', json.access_token);
+                            await EncStorage.setItem('kkrefresh', json.refresh_token);
+                            localStorage.setItem('kkexpiresin', new Date(new Date().setSeconds(new Date().getSeconds() + json.expires_in)).toString());
+
+                            if (RedirectTo === "app") {
+                                // TODO: add success message
+                                location.hash = "#success";
+                                location = "http://127.0.0.1:5934/?" + new URLSearchParams(json).toString();
+                            }
+                            else {
+                                location.replace(RedirectTo);
+                            }
+                        });
+                }
+                localStorage.removeItem('kstate');
+                localStorage.removeItem("RedirectTo");
+                localStorage.removeItem('kverifier');
+                throw new Error("");
+            }
+        }
+        localStorage.removeItem('kstate');
+        localStorage.removeItem('kverifier');
+        //submit();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,372 @@
+/* Default */
+#YouTubeConnectionURL>span {
+    font-size: 14px;
+    color: gray;
+}
+
+#YouTubeConnectionURL>input {
+    margin-top: 2px;
+    margin-bottom: 4px;
+    border-width: 1px;
+}
+
+.Dashboard {
+    width: 100%;
+}
+
+.Panels {
+    display: flex;
+    gap: 5px;
+    flex-direction: column;
+}
+
+.BackToConnectedAccounts {
+    height: 32px;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.BackToConnectedAccounts>svg {
+    width: 25px;
+    height: 25px;
+    display: inline-block;
+}
+
+.BackToConnectedAccounts>span {
+    position: relative;
+    bottom: 5px;
+    left: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: rgb(211, 211, 211);
+}
+
+.BackToConnectedAccounts:hover>svg>path,
+.BackToConnectedAccounts:hover>span {
+    color: white;
+    fill: white;
+}
+
+.Panel {
+    background-color: rgb(18, 18, 18);
+    max-width: 100%;
+    height: 500px;
+    border-radius: 5px;
+    border: 2px solid rgb(18, 18, 18);
+    display: flex;
+
+    flex-flow: column;
+    flex-shrink: 1;
+}
+
+#CombinedViews {
+    height: 250px;
+    background-color: rgb(26, 26, 26);
+}
+
+#CombinedViews>.Content {
+    padding: 10px;
+}
+
+.CVTotal {
+    font-size: 30px;
+}
+
+.CVPlatforms {
+    margin-top: 5px;
+}
+
+.CVPlatforms>div>a {
+    float: right;
+}
+
+.CVPlatforms>div#CVYouTube>a {
+    color: rgb(232, 51, 51);
+}
+
+.CVPlatforms>div#CVKick>a {
+    color: rgb(16, 255, 36);
+}
+
+.CVPlatforms>div>a.NotLive {
+    color: rgb(146, 0, 0) !important;
+}
+
+.CVPlatforms>div>span {
+    position: relative;
+    bottom: 5px;
+}
+
+.Panel>.Header {
+    width: 100%;
+    height: 40px;
+    padding: 10px;
+    background-color: rgb(81, 81, 81);
+    box-sizing: border-box;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+
+#Dashboard>.Title {
+    font-size: 32px;
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+.Header>.Popout {
+    background: none;
+    width: 28px;
+    height: 28px;
+    float: right;
+}
+
+
+.Header>.Collapse {
+    background: none;
+    width: 28px;
+    height: 28px;
+    float: right;
+}
+
+.Collapse>span {
+    position: relative;
+    bottom: 5px;
+}
+
+.Collapse>span::after {
+    content: "-";
+}
+
+.Collapse.Collapsed>span::after {
+    content: "+";
+}
+
+.Panel.Collapse {
+    height: 40px;
+}
+
+.Collapse>.Header {
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.Collapse>iframe {
+    display: none;
+}
+
+.Collapse>.Content {
+    display: none;
+}
+
+#CombinedViews.Collapse {
+    height: 40px;
+}
+
+.Header>.Hide {
+    background: none;
+    width: 28px;
+    height: 28px;
+    float: right;
+}
+
+.Popout>svg {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    bottom: 5px;
+}
+
+.Popout:disabled>svg>path {
+    fill: gray;
+}
+
+#MultistreamChat>iframe {
+    border: none;
+    width: 100%;
+    height: auto;
+    flex: 1 1 auto;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+/* Connected Platforms */
+#ConnectedPlatforms>div>img {
+    top: 4px;
+    position: relative;
+}
+
+#FullSize {
+    flex-grow: 1;
+}
+
+#FullSize.PollWidget {
+    display: flex;
+    flex-flow: column;
+    flex-shrink: 1;
+}
+
+#FullSize>button {
+    margin-bottom: 5px;
+    font-size: 18px;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.PollWidget>button {
+    width: 100%;
+    height: 40px;
+    padding: 10px;
+    background-color: rgb(255, 0, 0);
+    box-sizing: border-box;
+}
+
+#FullSize.TitleWidget {
+    display: flex;
+    flex-flow: column;
+    flex-shrink: 1;
+}
+
+.TitleWidget>button.Back {
+    width: 100%;
+    height: 40px;
+    padding: 10px;
+    background-color: rgb(255, 0, 0);
+    box-sizing: border-box;
+}
+
+.TitleWidget>input {
+    transition: 0.3s;
+    border-radius: 6px;
+    border-width: 1px;
+    border-color: white;
+    height: 34px;
+    padding: 5px;
+    font-size: 16px;
+}
+
+.scrolldiv>span {
+    left: 2px;
+    position: relative;
+    font-size: 14px;
+    width: fit-content;
+    display: inline-block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+
+.scrolldiv.HasImg>span {
+    left: 17px;
+}
+
+.scrolldiv>img {
+    width: 14px;
+    height: 14px;
+}
+
+.TitleWidget>.RegularText {
+    margin-left: 2px;
+    margin-top: 5px;
+    font-size: 16px;
+}
+
+.scrolldiv {
+    width: 100%;
+    height: 18px;
+    overflow: auto;
+    overflow-x: hidden;
+
+    position: relative;
+}
+
+.PollWidget>iframe {
+    height: 100%;
+    border: none;
+}
+
+#ConnectedPlatforms {
+    max-width: 100%;
+}
+
+#ConnectedPlatforms>div {
+    margin-bottom: 7px;
+}
+
+#ConnectedPlatforms>div>span {
+    position: relative;
+    width: 128px;
+}
+
+#ConnectedPlatforms>div>a {
+    color: red;
+    width: 100%;
+    display: inline-block;
+}
+
+#ConnectedPlatforms>div>button {
+    float: right;
+    height: 27px;
+    width: 100%;
+    font-size: 16px;
+    top: 1px;
+    display: block;
+    position: static;
+    z-index: 0;
+}
+
+@media (min-width: 435px) {
+    #ConnectedPlatforms {
+        max-width: 260px;
+    }
+
+    #ConnectedPlatforms>div>span {
+        display: inline-block;
+        z-index: -1;
+    }
+
+    #ConnectedPlatforms>div>button {
+        max-width: 100px;
+    }
+
+    .Panels {
+        flex-flow: unset;
+        flex-shrink: 0;
+        justify-content: space-between;
+    }
+
+    .Panel {
+        width: 325px;
+    }
+}
+
+.Platform3 {
+    background-color: rgb(33, 210, 81);
+}
+
+.Platform1:hover {
+    background-color: rgb(95, 43, 217)
+}
+
+.Platform2:hover {
+    background-color: rgb(232, 58, 58)
+}
+
+.Platform3:hover {
+    background-color: rgb(0, 220, 59)
+}
+
+#ConnectedPlatforms>div>button.disconnect {
+    background-color: rgb(167, 72, 72)
+}
+
+#ConnectedPlatforms>div>button.disconnect:hover {
+    background-color: rgb(187, 70, 70)
+}
+
+#ConnectedPlatforms>div>button:disabled {
+    background-color: rgb(113, 113, 113)
+}

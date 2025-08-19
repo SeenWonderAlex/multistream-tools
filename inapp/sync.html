@@ -1,0 +1,140 @@
+<html>
+
+<head>
+    <title>Syncing...</title>
+</head>
+
+<body>
+    <div style="display: none;">
+        <img src="../favicon.ico">
+        <span class="a">
+            Your connected accounts/settings had been successfully synced to the app.
+        </span>
+        <br>
+        <a class="button" onclick="window.close()">Close</a>
+    </div>
+
+    <style>
+        /* Page Style */
+        * {
+            color: rgb(239, 239, 241);
+            font-family: Roobert, sans-serif, Roboto, Helvetica, Arial;
+        }
+
+
+        body,
+        input,
+        select,
+        dialog {
+            background: rgb(26, 26, 26);
+            padding: 0;
+            margin: 0;
+        }
+
+        div {
+            width: 100%;
+            top: 20px;
+            position: relative;
+        }
+
+        img {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 100px;
+        }
+
+        .button {
+            background: #ff3b3b;
+            cursor: pointer;
+            margin: 0 auto;
+            display: block;
+
+            text-align: center;
+            padding-top: 8px;
+            text-decoration: none;
+
+            width: 250px;
+            height: 32px;
+            border-radius: 12px;
+            border-width: 0px;
+            transition: 0.3s;
+            font-size: 18;
+        }
+
+        .a {
+            text-align: center;
+            width: 100%;
+            display: block;
+            font-size: 24px;
+        }
+    </style>
+    <script type="text/javascript" src="../runtime/utils/encryption.js"></script>
+    <script type="text/javascript" src="../runtime/utils/src-5fa9F4.js"></script>
+    <script>
+        // For the app, setting the tokens.
+        const IsRunningFromApp = /MultistreamTools/i.test(navigator.userAgent);
+        if (IsRunningFromApp) {
+            location.replace("../")
+            throw new Error("");
+        }
+
+        if (!confirm("Do you want to sync your Connected Accounts & settings to your Multistream Tools app?")) {
+            location.replace("../")
+            window.close();
+            throw new Error("");
+        }
+
+        (async function () {
+            let storage = { ...localStorage };
+            // Twitch
+            if (storage.saved_access_token_e) {
+                storage.saved_access_token = await EncStorage.getItem("saved_access_token");
+                storage.saved_access_token_e = undefined;
+            }
+            if (storage.saved_refresh_token_e) {
+                storage.saved_refresh_token = await EncStorage.getItem("saved_refresh_token");
+                storage.saved_refresh_token_e = undefined;
+            }
+            // YouTube
+            if (storage.ytsavedtoken_e) {
+                storage.ytsavedtoken = await EncStorage.getItem("ytsavedtoken");
+                storage.ytsavedtoken_e = undefined;
+            }
+            if (storage.ytrefresh_e) {
+                storage.ytrefresh = await EncStorage.getItem("ytrefresh");
+                storage.ytrefresh_e = undefined;
+            }
+            // Kick
+            if (storage.kkactoken_e) {
+                storage.kkactoken = await EncStorage.getItem("kkactoken");
+                storage.kkactoken_e = undefined;
+            }
+            if (storage.kkrefresh_e) {
+                storage.kkrefresh = await EncStorage.getItem("kkrefresh");
+                storage.kkrefresh_e = undefined;
+            }
+
+            fetch("http://127.0.0.1:5934/", {
+                "method": "POST",
+                "headers": {
+                    "Content-Type": "application/json"
+                },
+                "body": JSON.stringify(storage)
+            }).then(res => {
+                if (res.ok) {
+                    document.title = "Success!";
+                    document.querySelector('div').style.display = "";
+                }
+                else
+                {
+                    location.replace("../auth/error.html?message=" + encodeURIComponent("We could not sync your data to the app."))
+                }
+            }).catch(err => {
+                location.replace("../auth/error.html?message=" + encodeURIComponent("Please check if you have the app."));
+            })
+        })();
+    </script>
+</body>
+
+</html>

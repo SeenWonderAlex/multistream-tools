@@ -1,0 +1,90 @@
+<html>
+
+<head>
+    <title>Disconnected!</title>
+    <link rel="icon" type="image/x-icon" href="../favicon.ico">
+</head>
+
+<body>
+    <div>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 5 38 37">
+            <path
+                d="M0 17 22 17C24 18 24 20 22 21L4 21 4 38 22 38 22 25C23 23 25 23 26 25L26 42 0 42 0 17M25 19 29 22 34 14 38 17 37 5 26 9 30 11 25 19"
+                fill="#FFFFFF"></path>
+        </svg>
+        <br>
+        <span class="a">
+            Popped Out
+        </span>
+        <br>
+        <button>Close</button>
+    </div>
+
+    <script>
+        document.querySelector('button').addEventListener('click', (ev) => {
+            document.querySelector('button').disabled = true;
+            const Win = (window.opener || window.parent)
+            if (Win) {
+                Win.postMessage({
+                    "type": "closePopout"
+                });
+            }
+        })
+    </script>
+
+    <style>
+        /* Page Style */
+        * {
+            color: rgb(239, 239, 241);
+            font-family: Roobert, sans-serif, Roboto, Helvetica, Arial;
+        }
+
+        body,
+        input,
+        select,
+        dialog {
+            background: rgb(26, 26, 26);
+            padding: 0;
+            margin: 0;
+        }
+
+        div {
+            width: 100%;
+            top: 20px;
+            position: relative;
+        }
+
+        svg {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 100px;
+        }
+
+        button {
+            background: #900f0f;
+            cursor: pointer;
+            margin: 0 auto;
+            display: block;
+
+            text-align: center;
+            text-decoration: none;
+
+            width: 250px;
+            height: 36px;
+            border-radius: 7px;
+            border-width: 0px;
+            transition: 0.3s;
+            font-size: 18;
+        }
+
+        .a {
+            text-align: center;
+            width: 100%;
+            display: block;
+            font-size: 24px;
+        }
+    </style>
+</body>
+
+</html>

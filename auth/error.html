@@ -1,0 +1,83 @@
+<html>
+
+<head>
+    <title>Authenication Failed</title>
+    <link rel="icon" type="image/x-icon" href="../favicon.ico">
+</head>
+
+<body>
+    <div>
+        <img src="../favicon.ico">
+        <span class="a">
+            Looks like you canceled the Authenication process.
+        </span>
+        <br>
+        <a class="button" href="../">Return to Homepage</a>
+    </div>
+
+    <script>
+        const Search = new URLSearchParams(location.search);
+        if (Search.has("message") && Search.get("message").length > 0) {
+            document.querySelector('span.a').innerText = Search.get("message");
+        }
+        localStorage.removeItem("kkstate");
+        localStorage.removeItem("state");
+    </script>
+
+    <style>
+        /* Page Style */
+        * {
+            color: rgb(239, 239, 241);
+            font-family: Roobert, sans-serif, Roboto, Helvetica, Arial;
+        }
+
+        body,
+        input,
+        select,
+        dialog {
+            background: rgb(26, 26, 26);
+            padding: 0;
+            margin: 0;
+        }
+
+        div {
+            width: 100%;
+            top: 20px;
+            position: relative;
+        }
+
+        img {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 100px;
+        }
+
+        .button {
+            background: #ff3b3b;
+            cursor: pointer;
+            margin: 0 auto;
+            display: block;
+
+            text-align: center;
+            padding-top: 8px;
+            text-decoration: none;
+
+            width: 250px;
+            height: 32px;
+            border-radius: 12px;
+            border-width: 0px;
+            transition: 0.3s;
+            font-size: 18;
+        }
+
+        .a {
+            text-align: center;
+            width: 100%;
+            display: block;
+            font-size: 24px;
+        }
+    </style>
+</body>
+
+</html>

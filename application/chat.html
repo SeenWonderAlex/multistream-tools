@@ -1,0 +1,170 @@
+<html>
+
+<head>
+    <title>Multistream Chat</title>
+    <link rel="stylesheet" href="cdn/chat.css" />
+    <link rel="icon" type="image/x-icon" href="../favicon.ico">
+</head>
+
+<body>
+    <div class="Main">
+        <div id="Messages">
+            <div class="Message">
+                <span class="Time">{MESSAGE.TIME}</span>
+                <!-- Profile or Mod Actions -->
+                <div class="ModActions">
+                    <button class="Ban" title="Ban user">
+                        <svg width="20" height="20" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M2 10a8 8 0 1 1 16 0 8 8 0 0 1-16 0zm8 6a6 6 0 0 1-4.904-9.458l8.362 8.362A5.972 5.972 0 0 1 10 16zm4.878-2.505a6 6 0 0 0-8.372-8.372l8.372 8.372z"
+                                clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                    <button class="Timeout" title="Timeout user 1 min (Right click for custom)">
+                        <svg width="20" height="20" viewBox="0 0 20 20">
+                            <path d="M11 9.586V6H9v4.414l2.293 2.293 1.414-1.414L11 9.586z"></path>
+                            <path fill-rule="evenodd"
+                                d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0zm-2 0a6 6 0 1 1-12 0 6 6 0 0 1 12 0z"
+                                clip-rule="evenodd"></path>
+                        </svg>
+                    </button>
+                    <button class="Delete" title="Delete message">
+                        <svg width="20" height="20" viewBox="0 0 20 20">
+                            <path d="M12 2H8v1H3v2h14V3h-5V2zM4 7v9a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7h-2v9H6V7H4z"></path>
+                            <path d="M11 7H9v7h2V7z"></path>
+                        </svg>
+                    </button>
+                </div>
+                <img class="PFP" loading="lazy" src="{MESSAGE.PFPURL}">
+                <!-- Badges -->
+                <div class="Badges">
+                    <img class="NUMORPLATFORM Hide" loading="lazy" src="{MESSAGE.BADGE.PLATFORMORPRED}">
+                    <img class="MODTYPE Hide" loading="lazy" src="{MESSAGE.BADGE.MODORVIP}">
+                    <img class="SUBSTATUS Hide" loading="lazy" src="{MESSAGE.BADGE.SUB}">
+                    <img class="USERBADGE Hide" loading="lazy" src="{MESSAGE.BADGE.CHOSEN}">
+                </div>
+                <span class="Username Text">{MESSAGE.USERNAME}</span>
+                <!-- Seperator -->
+                <span class="TextNoPadding">:</span>
+                <!-- MESSAGE -->
+                <span class="Msg Text">{MESSAGE.DISPLAY}</span>
+            </div>
+        </div>
+        <div id="SettingsModal" class="Modal Hide">
+            <span class="ModalTitle">Settings</span>
+            <button class="ModalExit">-</button>
+            <br>
+            <br>
+            <div class="ModalItems">
+                <div class="ModalToggle">
+                    <span>Mod Actions</span>
+                    <label class="ModalSwitch">
+                        <input type="checkbox">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
+                <button class="ModalSectionButton">
+                    <span>Moderation Activity Options</span>
+                    <a style="float: right;">...</a>
+                </button>
+            </div>
+        </div>
+        <div id="BottomBox">
+            <div class="Input">
+                <button id="Switch">
+                    <img draggable="false" class="OnId" loading="lazy" src="cdn/AllIcon.svg">
+                    <img draggable="false" class="PauseId" loading="lazy" src="cdn/pause.svg">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 11 11">
+                        <path d="M4 0 7 0 7 6 3 6 11 6 11 6 6 11 5 11 0 6 4 6" fill="#eba134" />
+                    </svg>
+                </button>
+                <span class="StreamerName">You</span>
+                <br>
+                <div role="textbox" spellcheck="true" id="MessageField" contenteditable="plaintext-only"
+                    data-placeholder="Broadcast to all platforms"></div>
+                <button id="MessageSend">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24px" height="24px" viewBox="0 0 24 24" fill="none">
+                        <path d="M20 12L4 4L6 12M20 12L4 20L6 12M20 12H6" stroke="white" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </button>
+                <br>
+                <div id="Buttons">
+                    <button id="SettingsIcon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+                            class="icon icon-tabler icons-tabler-outline icon-tabler-settings">
+                            <path
+                                d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" />
+                            <path stroke-width="1" fill="white" d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
+                        </svg>
+                    </button>
+                    <button id="SIcon">
+
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+    <script type="text/javascript">
+        const channel = new BroadcastChannel('tab');
+        channel.postMessage('another-tab');
+        channel.addEventListener('message', (msg) => {
+            if (msg.data === 'another-tab') {
+                location.href = "../alerts/another-tab.html";
+            }
+        });
+
+        const elem = document.getElementById("BottomBox");
+        let prevHeight;
+        new ResizeObserver(([change]) => {
+            if ((prevHeight = change.contentRect.height) == prevHeight) {
+                document.getElementById("Messages").style.setProperty("--height", change.contentRect.height + "px");
+                document.getElementById("SettingsModal").style = "--offset:" + change.contentRect.height + "px";
+                document.querySelector(".ModalItems").style = "--height:" + ((prevHeight2 - prevHeight) - 30) + "px";
+            }
+        }).observe(elem);
+
+        let prevHeight2;
+        new ResizeObserver(([change]) => {
+            if ((prevHeight2 = change.contentRect.height) == prevHeight2) {
+                document.querySelector(".ModalItems").style = "--height:" + ((prevHeight2 - prevHeight) - 30) + "px";
+            }
+        }).observe(document.body);
+
+        window.MessageTemplate = document.querySelector('#Messages > .Message').outerHTML;
+        window.NamePlaceholder = document.querySelector('.StreamerName');
+        document.querySelector('#Messages > .Message').remove();
+
+        if (sessionStorage.getItem("cache_msglist") !== null) {
+            const EventHTML = document.createElement('div');
+            EventHTML.className = "Message UserEvent";
+            const Gap = document.createElement('div');
+            Gap.className = "gap";
+            const Span = document.createElement('span');
+            Span.className = "Msg Text";
+            Span.style.color = "gray";
+
+            Span.innerText = "Loading cached messages from previously connected chat";
+
+            EventHTML.appendChild(Gap);
+            EventHTML.appendChild(Span);
+            document.getElementById('Messages').appendChild(EventHTML);
+
+            document.getElementById('Messages').style.display = 'none';
+            document.getElementById('Messages').style.display = 'block';
+            document.getElementById('Messages').style.display = '';
+        }
+    </script>
+    <script type="text/javascript" src="../eventsub.js"></script>
+    <script type="text/javascript" src="../runtime/utils/encryption.js"></script>
+    <script type="text/javascript" src="../runtime/utils/src-5fa9F4.js"></script>
+    <script src="https://js.pusher.com/8.4.0/pusher.min.js"></script>
+    <script type="text/javascript" src="src/socket.io.min.js"></script>
+    <script type="text/javascript" src="src/kick-integration.js"></script>
+    <script type="text/javascript" src="src/chat.js"></script>
+</body>
+
+</html>

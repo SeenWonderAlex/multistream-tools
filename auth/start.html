@@ -1,0 +1,107 @@
+<html>
+
+<head>
+    <title>Redirecting</title>
+</head>
+
+<body>
+    <style>
+        body,
+        input,
+        select,
+        dialog {
+            background: rgb(26, 26, 26);
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+    <script type="text/javascript" src="../runtime/utils/encryption.js"></script>
+    <script type="text/javascript" src="../runtime/utils/src-5fa9F4.js"></script>
+    <script>
+        let a;
+
+        const bufferToBase64 = (input) => {
+            const arr = new Uint8Array(input);
+            const b = btoa(String.fromCharCode(...Array.from(arr))).replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=/g, '');
+            return b;
+        };
+
+        function getRandomString(i = 8) {
+            const randomValues = new Uint32Array(i);
+            window.crypto.getRandomValues(randomValues);
+
+            // Encode as UTF-8
+            const utf8Encoder = new TextEncoder();
+            const utf8Array = utf8Encoder.encode(
+                String.fromCharCode.apply(null, randomValues)
+            );
+
+            // Base64 encode the UTF-8 data
+            return btoa(String.fromCharCode.apply(null, utf8Array))
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=+$/, '');
+        }
+
+        async function KickSubmit() {
+            const state = "kick" + getRandomString();
+            const code_verifier = getRandomString();
+            a = await window.crypto.subtle.digest("SHA-256", new TextEncoder().encode(code_verifier));
+            const code_challenge = bufferToBase64(a);
+
+            localStorage.setItem('kverifier', code_verifier);
+            localStorage.setItem('kstate', state);
+
+            const redirect_uri = encodeURIComponent(location.protocol + "//" + location.host + location.pathname.replace("start", "complete"));
+            location.replace(`https://id.kick.com/oauth/authorize?client_id=01K21B2JMB2GNMK1R7PYMKMJXB&response_type=code&redirect_uri=${redirect_uri}&state=${state}&code_challenge_method=S256&code_challenge=${code_challenge}&scope=user:read+channel:read+channel:write+chat:write+events:subscribe+moderation:ban`);
+        }
+
+        //const RedirectTo = localStorage.getItem("RedirectTo");
+        (function () {
+            const query = new URLSearchParams(location.search);
+            if (localStorage.getItem("RedirectTo") === null || query.has("isapp")) {
+                localStorage.setItem("RedirectTo", query.has("isapp") ? "app" : "../application/");
+            }
+            if (query.has("type")) {
+                switch (query.get("type")) {
+                    case "Kick":
+                        KickSubmit();
+                        return;
+                    case "Twitch":
+                        const State = ('ttv' + getRandomString());
+                        localStorage.setItem('state', State);
+
+                        const IsLocalHost = location.hostname === "localhost"; // Is in a development testing environment?
+                        const redirect_uri = "https://seenwalex.wixsite.com/chat-live/_functions/CompleteAuth/Twitch" + (IsLocalHost ? "/ToLocalHost" : "");
+
+                        location.replace('https://id.twitch.tv/oauth2/authorize?client_id=b5d3338b79q2xza4zab9j5g9vhk7is&redirect_uri=' + encodeURIComponent(redirect_uri) + '&response_type=code&scope=clips:edit+chat:read+chat:edit+channel:moderate+channel:read:subscriptions+moderation:read+channel:edit:commercial+channel:read:hype_train+channel:manage:broadcast+channel:manage:redemptions+channel:manage:polls+channel:manage:predictions+moderator:manage:automod+moderator:read:automod_settings+moderator:manage:banned_users+moderator:manage:blocked_terms+moderator:manage:chat_settings+channel:manage:raids+moderator:manage:announcements+moderator:manage:chat_messages+channel:manage:moderators+moderator:read:vips+moderator:read:moderators+channel:manage:vips+moderator:read:chatters+moderator:manage:shield_mode+moderator:manage:shoutouts+moderator:read:followers+user:read:chat+channel:manage:ads+user:write:chat+user:read:emotes+moderator:manage:unban_requests+moderator:read:suspicious_users+moderator:manage:warnings+channel:read:ads&state=' + State);
+                        return;
+                    case "YouTube":
+                        const YTState = ('yt' + getRandomString());
+                        localStorage.setItem('state', YTState);
+
+                        // Parameters to pass to OAuth 2.0 endpoint.
+                        var params = new URLSearchParams({
+                            'client_id': '597860444523-l87m271jorgmc0a9ea2vnn4ohqkmjphi.apps.googleusercontent.com',
+                            'redirect_uri': 'https://seenwalex.wixsite.com/chat-live/_functions/Red',
+                            'response_type': 'code',
+                            'access_type': 'offline',
+                            'scope': 'https://www.googleapis.com/auth/youtube',
+                            'include_granted_scopes': 'true',
+                            'state': YTState,
+                            'prompt': 'consent'
+                        });
+
+                        location.replace('https://accounts.google.com/o/oauth2/v2/auth?' + params.toString());
+                        return;
+                }
+            }
+            location.replace("../");
+        })();
+        //submit();
+    </script>
+</body>
+
+</html>

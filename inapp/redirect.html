@@ -1,0 +1,70 @@
+<html>
+
+<head>
+    <title>Multistream Tools</title>
+</head>
+
+<body>
+    <style>
+        body,
+        input,
+        select,
+        dialog {
+            background: rgb(26, 26, 26);
+            padding: 0;
+            margin: 0;
+        }
+    </style>
+    <script type="text/javascript" src="../runtime/utils/encryption.js"></script>
+    <script type="text/javascript" src="../runtime/utils/src-5fa9F4.js"></script>
+    <script>
+        // For the app, setting the tokens.
+        const IsRunningFromApp = /MultistreamTools/i.test(navigator.userAgent);
+        if (!IsRunningFromApp) {
+            location.replace("../application/")
+            throw new Error("");
+        }
+
+        window.electronAPI.onMessageReceiver(async (data) => {
+            if (data.type === "setSettings") {
+                localStorage.clear();
+
+                const entries = Object.entries(data.data);
+                for (const entry of entries) {
+                    localStorage.setItem(entry[0], entry[1]);
+                }
+            }
+            if (data.type === "setTokens") {
+                EncStorage.removeItem("kkactoken");
+                EncStorage.removeItem("saved_access_token");
+                EncStorage.removeItem("ytsavedtoken");
+
+                EncStorage.removeItem("kkrefresh");
+                EncStorage.removeItem("saved_refresh_token");
+                EncStorage.removeItem("ytrefresh");
+
+                console.log(data);
+
+                if (data.ttv) {
+                    await EncStorage.setItem("saved_access_token", data.ttv[0]);
+                    await EncStorage.setItem("saved_refresh_token", data.ttv[1]);
+                    localStorage.setItem("saved_expiresin", data.ttv[2]);
+                }
+                if (data.kk) {
+                    await EncStorage.setItem("kkactoken", data.kk[0]);
+                    await EncStorage.setItem("kkrefresh", data.kk[1]);
+                    localStorage.setItem("kkexpiresin", data.kk[2]);
+                }
+                if (data.yt) {
+                    await EncStorage.setItem("ytsavedtoken", data.yt[0]);
+                    await EncStorage.setItem("ytrefresh", data.yt[1]);
+                    localStorage.setItem("ytexpiresin", data.yt[2]);
+                }
+
+                location.replace("../application/");
+            }
+        });
+    </script>
+</body>
+
+</html>

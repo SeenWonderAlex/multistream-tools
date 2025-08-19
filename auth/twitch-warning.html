@@ -1,0 +1,34 @@
+<title>Multistream Tools</title>
+
+<head>
+    <link rel="stylesheet" href="../style.css" />
+    <link rel="icon" type="image/x-icon" href="../favicon.ico">
+</head>
+
+<body>
+    <p style="color: red; font-size: 32px;">WARNING:</p>
+    <p style="display: none;" id="Text">According to <a href="https://help.twitch.tv/s/article/simulcasting-guidelines">Twitch's Simulcasting
+            Guidelines</a>, you
+        are allowed to use Multistream Tools, as long as you don't show <span
+            style="text-decoration: underline;">anything</span> in <span style="text-decoration: underline;">our
+            website</span> to <span style="text-decoration: underline;">your Twitch stream</span>. We encourage you to
+        follow these guidelines,
+        to prevent an enforcement action from Twitch.</p>
+    <p>Multistream Tools is intended for your personal use and doesn't change anything in the viewer's perspective. It's
+        a seamless tool for just streamers.</p>
+    <br>
+</body>
+
+<script>
+    const Submit = document.createElement('input');
+    Submit.type = "submit";
+    Submit.value = "Continue";
+    Submit.disabled = true;
+    Submit.addEventListener('click', ev => {
+        localStorage.setItem("warning_agreed", "true");
+        location.href = "start.html?type=Twitch";
+    });
+    setTimeout(() => { document.querySelector("#Text").style.display = ""; }, 100)
+    setTimeout(() => { Submit.disabled = false; }, 3000)
+    document.body.appendChild(Submit);
+</script>

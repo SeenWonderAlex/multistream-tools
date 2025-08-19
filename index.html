@@ -5,46 +5,97 @@
     <link rel="stylesheet" href="./style.css" />
     <link rel="icon" type="image/x-icon" href="./favicon.ico">
     <style>
-        .footer
-        {
+        body {
+            background-color: rgb(28, 28, 28);
+        }
+
+        .footer {
             position: fixed;
             bottom: 0;
             background-color: black;
             width: 100%;
             left: 0;
         }
+
+        .footer>span {
+            float: right;
+            display: block;
+            position: absolute;
+            top: 17px;
+            right: 5px;
+            color: yellow;
+        }
+
+        .Logo {
+            text-align: center;
+            background-color: rgb(96, 96, 96);
+            padding-bottom: 10px;
+            display: block;
+            border: none;
+            width: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        .Logo>.Title {
+            font-size: 36px;
+        }
+
+        .Button {
+            background: #18aee4;
+            cursor: pointer;
+            width: 128px;
+            height: 20px;
+            border-radius: 12px;
+            border-width: 0px;
+            padding: 8px 50px;
+            transition: 0.3s;
+            font-size: 18px;
+            color: white;
+            text-align: center;
+            margin: 0;
+            text-decoration: none;
+            margin-top: 4px;
+            display: block;
+
+            position: relative;
+            left: calc(50% - 120px);
+        }
+
+        .Button:hover {
+            background: rgb(31, 198, 198)
+        }
+
+        .Temp {
+            position: absolute;
+            top: 300px;
+            color: orange;
+        }
     </style>
 </head>
 
 <body>
-    <img src="./logo.png" height="32">
-    <span style="font-size: 30px;">Multistream Tools</span>    <br>
-    <a style="color: rgb(235, 235, 235); font-size: 16px;">The simple tools you need for multistreaming in multiple platforms.</a>
+    <div class="Logo">
+        <img src="./logo.png" height="100">
+        <br>
+        <span class="Title">Multistream Tools</span>
+        <br>
+        <hr>
+        <span style="font-size: 18px;">Moderate and multiple platforms at once!<br>Combined Chats, Polls, & Other Free Tools!<br> Supports
+        </span><span style="font-size: 18px; font-weight: bold;">YouTube, Twitch, Kick</span> <span
+            style="font-size: 18px;">using the Public API. No account required!</span>
+        <br>
+        <a class="Button" href="application/">Dashboard</a>
+    </div>
+
     <br><br>
-    <div>
-        <a style="color: white;">Combined Twitch & YouTube Polls</a><br>
-        <a style="color: rgb(235, 235, 235); font-size: 14px;">Combine multiple platforms that support polling into one result.</a>
-        <br>
-        <hr>
-        <a id="PollLink" href="./polling.html">Visit Page</a><br>
-        <a onclick="Popout('PollLink')" href="#popup">Popout as a Window</a>
-    </div>
-    <br>
-    <div>
-        <a style="color: white;">Monitor Twitch Channel Point Redemptions</a><br>
-        <a style="color: rgb(235, 235, 235); font-size: 14px;">Check if a Channel Point Redemption is refunded or completed.</a>
-        <br>
-        <hr>
-        <a id="PollLink2" href="./ttv-redemptions.html">Visit Page</a><br>
-        <a onclick="Popout('PollLink2')" href="#popup">Popout as a Window</a>
-    </div>
-    <script type="text/javascript">
-        function Popout(ID) {
-            window.open(document.getElementById(ID).href, "_blank", "popup=yes");
-        }
-    </script>
+
+    <span class="Temp">Please be advised, we are in the process of re-designing the website. The new dashboard is available, but our policies haven't been updated. Our privacy statement of storing your data in local browser is still valid. We will never collect any data ourselves.</span>
     <div class="footer">
-        <p style="background: none;">Developed by © SeenWonderAlex <a href="./about.html">About Us</a> <a href="./privacy.html">Privacy Policy</a></p>
+        <p style="background: none;">Developed by SeenWonderAlex <a
+                href="./privacy.html">Privacy Policy</a></p>
+        <span>New Policies WIP</span>
     </div>
 </body>
 

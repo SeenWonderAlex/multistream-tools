@@ -1,0 +1,603 @@
+#BottomBox {
+    background-color: rgb(49, 43, 43);
+    position: fixed;
+    width: 100%;
+    padding: 0;
+    bottom: 0;
+    display: flex;
+    height: fit-content;
+}
+
+.Main {
+    width: 100%;
+    height: 100%;
+}
+
+.Input {
+    display: block;
+    flex-shrink: 0;
+    flex-grow: 1;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+#Switch {
+    width: 30px;
+    height: 32px;
+    background: none;
+}
+
+#Switch>img.OnId {
+    fill: rgb(34, 24, 24);
+}
+
+#Switch>img {
+    width: 20px;
+    height: 20px;
+    left: 2.5px;
+    top: 4px;
+    position: relative;
+}
+
+#Switch>.PauseId {
+    top: 6px;
+    left: 5px;
+    width: 20px;
+    height: 20px;
+    display: none;
+}
+
+#Switch>.OnId {
+    filter: opacity(0.25);
+}
+
+#Switch.YTConnected>.OnId {
+    filter: none;
+}
+
+#Switch>svg {
+    left: 2px;
+    top: 4px;
+    height: 20px;
+    position: relative;
+    display: none;
+}
+
+#Switch.Pause>.PauseId {
+    display: inline;
+}
+
+#Switch.Pause>.OnId {
+    display: none;
+}
+
+#Switch.Pause.Scrolled:hover>.PauseId {
+    display: none;
+}
+
+#Switch.Pause.Scrolled:hover>svg {
+    display: inline;
+}
+
+#Switch.Clicked>img {
+    animation: switchClicked 100ms ease-out backwards;
+}
+
+@keyframes switchClicked {
+    from {
+        transform: scale(50%);
+        opacity: 0.5;
+    }
+
+    to {
+        transform: scale(100%);
+        opacity: 1;
+    }
+}
+
+/* Modals */
+#SettingsModal {
+    height: fit-content;
+    background-color: rgb(40, 40, 40);
+    border: 2px solid black;
+    border-radius: 10px;
+    padding: 10px;
+    width: calc(100% - 33px);
+    max-height: calc(100% - var(--offset) - 40px);
+    left: 5px;
+}
+
+.Modal {
+    position: fixed;
+    bottom: calc(var(--offset) + 10px);
+}
+
+.ModalTitle {
+    font-size: 18px;
+}
+
+.ModalExit {
+    position: absolute;
+    right: 12px;
+    width: 16px;
+    top: 2px;
+    font-size: 24px;
+    background: none;
+    user-select: none;
+}
+
+.ModalExit:hover {
+    background: none;
+    color: rgb(180, 180, 180);
+}
+
+.ModalBack {
+    position: absolute;
+    width: 30px;
+    height: 21px;
+    top: 7px;
+    left: 2px;
+    font-size: 20px;
+    background: none;
+    user-select: none;
+}
+
+.ModalBack:hover {
+    background: none;
+    color: rgb(180, 180, 180);
+}
+
+.Indent {
+    margin-left: 20px;
+}
+
+.ModalSwitch {
+    position: relative;
+    display: block;
+    width: 45px;
+    height: 24px;
+    float: right;
+}
+
+.ModalToggle {
+    height: 30px;
+}
+
+.ModalToggle>span {
+    text-overflow: clip;
+    width: calc(100% - 50px);
+    white-space: nowrap;
+    overflow: hidden;
+    display: inline-block;
+    margin-top: 4px;
+}
+
+.ModalSectionButton {
+    text-align: left;
+    width: calc(100% + 20px);
+    box-sizing: border-box;
+    background: none;
+    font-size: 16px;
+    padding-left: 10px;
+    margin-left: -10px;
+    padding-right: 10px;
+    border-radius: 0;
+    transition: none;
+}
+
+.ModalSectionButton:hover {
+    background-color: rgb(51, 51, 51);
+}
+
+.ModalItems {
+    max-height: min(400px, var(--height) - 60px);
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.ModalItems>details {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.ModalItems>details:open>summary {
+    margin-bottom: 10px;
+}
+
+/* Message Style */
+#Messages {
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - var(--height));
+    position: absolute;
+    bottom: calc(var(--height) + 2px);
+    width: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.Message {
+    display: inline-block;
+    flex-shrink: 0;
+    padding-left: 5px;
+    width: 100%;
+}
+
+.Message>.gap,
+.empty-gap {
+    height: 26px;
+    width: 0px;
+    display: inline-block;
+    background-color: rgb(26, 26, 26);
+}
+
+.Message>.PFP {
+    border-radius: 25px;
+    height: 30px;
+    width: 30px;
+    position: relative;
+    top: 10px;
+    display: inline-block;
+}
+
+.loadingicon {
+    border-radius: 12px;
+    border-left: 2px solid var(--color);
+    border-top: 2px solid var(--color);
+    width: 15px;
+    height: 15px;
+    top: 5px;
+    right: 8px;
+    position: relative;
+    flex-shrink: 0;
+    background-color: none;
+    animation: rotateloop 0.75s linear infinite;
+}
+
+.Strike {
+    text-decoration: line-through;
+}
+
+.Msg>.loadingicon {
+    display: inline-block;
+    right: 0px;
+    top: 2px;
+}
+
+@keyframes rotateloop {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.Message>.Text {
+    position: relative;
+    padding: 0;
+    top: 2px;
+}
+
+.Message>.Text>a {
+    color: white;
+    text-decoration: none;
+}
+
+.MentionBG {
+    background-color: #004dd3;
+}
+
+.Message>.Text>a:hover[href] {
+    text-decoration: underline;
+}
+
+.Message.UserEvent>.Msg {
+    right: 1px;
+}
+
+.Message.RewardEvent,
+.RewardEventInput {
+    padding-left: 6px;
+    border-left: 3px solid gray;
+    font-size: 17px;
+}
+
+.RewardEventInput {
+    padding-left: 8px;
+}
+
+.Message.RewardEvent {
+    font-size: 17px;
+    margin-top: 2px;
+}
+
+.Message.RewardEvent>.Msg {
+    padding-left: 4px;
+    top: 0;
+}
+
+.Message.RewardEvent>.Msg>span {
+    color: rgb(172, 172, 172);
+}
+.Message.RewardEvent>.Msg>.Price {
+    color: whitesmoke;
+}
+
+.Message>.Text>img {
+    position: relative;
+    padding: 0;
+    top: 5px;
+    height: 23px;
+    width: 23px;
+}
+
+.Message>.TextNoPadding {
+    position: relative;
+    margin-left: -4px;
+    top: 2px;
+}
+
+.Badges>img {
+    border-radius: 3px;
+    height: 23px;
+    width: 23px;
+    position: relative;
+    top: 7px;
+}
+
+.Message>.Username {
+    color: rgb(137, 137, 137);
+    text-decoration: none;
+}
+
+.Message>a.Username:hover {
+    text-decoration: underline;
+}
+
+.Message>.Time {
+    margin-right: 3px;
+    position: relative;
+    top: 1px;
+    display: inline-block;
+    color: rgb(171, 171, 171);
+}
+
+/* Groups */
+.ModActions {
+    display: inline-block;
+    user-select: none;
+}
+
+.Badges {
+    display: inline-block;
+}
+
+/* Mod Actions */
+
+.ModActions>button {
+    width: 15px;
+    top: 5px;
+    position: relative;
+    background: none;
+    flex-shrink: 0;
+}
+
+.ModActions>button:hover {
+    background: none;
+}
+
+.ModActions>button>svg {
+    right: 10px;
+    position: relative;
+}
+
+.ModActions>button>svg>path {
+    fill: rgb(97, 89, 89);
+}
+
+.ModActions>button:hover.Ban>svg>path {
+    fill: red;
+}
+
+.ModActions>button:hover.Timeout>svg>path {
+    fill: rgb(181, 166, 0);
+}
+
+.ModActions>button:hover.Delete>svg>path {
+    fill: rgb(185, 185, 185);
+}
+
+.ModActions>button:disabled>svg>path {
+    fill: rgb(46, 43, 43) !important;
+}
+
+.ModActions>button:disabled {
+    background: none;
+    cursor: default;
+}
+
+/* Bottom Box */
+#MessageField {
+    min-height: 25px;
+    box-sizing: border-box;
+    width: calc(100% - 60px);
+    border: 1px solid rgb(196, 196, 196);
+    border-radius: 8px;
+    display: inline-block;
+    padding: 5px;
+    margin-left: 5px;
+}
+
+#MessageSend {
+    width: 50px;
+    height: 30px;
+    top: 5px;
+    position: relative;
+}
+
+#Buttons>button {
+    background: none;
+    width: 20px;
+    margin-right: 2px;
+}
+
+#Buttons>#SettingsIcon>svg {
+    transition: 0.3s;
+}
+
+#Buttons>#SettingsIcon:hover>svg {
+    transform: rotate(90deg);
+}
+
+#Buttons>#SettingsIcon:active>svg {
+    transform: rotate(0deg);
+}
+
+#MessageField:empty:before {
+    content: attr(data-placeholder);
+    color: rgb(180, 180, 180);
+    cursor: text;
+}
+
+/* Page Style */
+* {
+    color: rgb(239, 239, 241);
+    font-family: Roobert, sans-serif, Roboto, Helvetica, Arial;
+}
+
+body,
+input,
+select,
+dialog {
+    background: rgb(26, 26, 26);
+    padding: 0;
+    margin: 0;
+}
+
+dialog {
+    bottom: 75%;
+}
+
+dialog::backdrop {
+    background-color: rgb(255 0 0 / 25%);
+}
+
+a[href] {
+    color: rgb(169, 112, 255);
+}
+
+input[disabled] {
+    background: #3e0000;
+}
+
+input,
+select {
+    width: 100%;
+}
+
+select {
+    transition: 0.3s;
+    border-radius: 6px;
+    border-width: 2px;
+    border-color: white;
+}
+
+input[type="submit"]:hover,
+button:hover {
+    background: rgb(24, 163, 70)
+}
+
+input[type="button"],
+input[type="submit"],
+button {
+    background: #33c34e;
+    cursor: pointer;
+    width: 100%;
+    height: 32px;
+    border-radius: 12px;
+    border-width: 0px;
+    transition: 0.3s;
+    font-size: 18;
+}
+
+input[type="checkbox"] {
+    width: auto;
+}
+
+input[type="submit"]:disabled {
+    background: grey;
+    cursor: not-allowed;
+}
+
+.Hide {
+    display: none !important;
+}
+
+/* The slider */
+.ModalSwitch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.ModalField {
+    margin-top: 2px;
+    height: 26px;
+}
+
+details > .ModalField {
+    margin-top: 3px;
+}
+
+.ModalField input {
+    transition: 0.3s;
+    border-radius: 6px;
+    border-width: 1px;
+    border-color: rgb(186, 186, 186);
+    width: 50px;
+    height: 25px;
+    padding: 5px;
+    background: none;
+    float: right;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .2s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .2s;
+}
+
+input:checked+.slider {
+    background-color: #69bbff;
+}
+
+input:focus+.slider {
+    box-shadow: 0 0 1px #69bbff;
+}
+
+input:checked+.slider:before {
+    transform: translateX(21px);
+}
+
+/* Rounded sliders */
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}

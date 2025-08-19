@@ -1,0 +1,78 @@
+<html>
+
+<head>
+    <title>Disconnected!</title>
+    <link rel="icon" type="image/x-icon" href="../favicon.ico">
+</head>
+
+<body>
+    <div>
+        <img src="../favicon.ico">
+        <span class="a">
+            Multistream Chat only works on one tab due to technical restrictions.
+        </span>
+        <button>Reconnect</button>
+    </div>
+
+    <script>
+        document.querySelector('button').addEventListener('click', (ev) => {
+            document.querySelector('button').disabled = true;
+            const channel = new BroadcastChannel('tab');
+            channel.postMessage('another-tab');
+            location.href = "../application/chat"
+        })
+    </script>
+
+    <style>
+        /* Page Style */
+        * {
+            color: rgb(239, 239, 241);
+            font-family: Roobert, sans-serif, Roboto, Helvetica, Arial;
+        }
+
+        body,
+        input,
+        select,
+        dialog {
+            background: rgb(26, 26, 26);
+            padding: 0;
+            margin: 0;
+        }
+
+        div {
+            width: 100%;
+            top: 20px;
+            position: relative;
+        }
+
+        img {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 25%;
+        }
+
+        button {
+            background: #4fae60;
+            cursor: pointer;
+            left: 10px;
+            position: relative;
+            top: 20px;
+            width: calc(100% - 20px);
+            height: 32px;
+            border-radius: 12px;
+            border-width: 0px;
+            transition: 0.3s;
+            font-size: 18;
+        }
+
+        .a {
+            text-align: center;
+            width: 100%;
+            display: block;
+            font-size: 24px;
+        }
+    </style>
+</body>
+
+</html>

@@ -86,7 +86,7 @@ class initSocket {
                     }
 
                     this.silence(keepalive_timeout_seconds);
-                    
+
                     break;
                 case 'session_keepalive':
                     //log(`Recv KeepAlive - ${message_type}`);
@@ -123,6 +123,20 @@ class initSocket {
                     log(`${this.eventsub.counter} Recv Disconnect`);
                     console.log('websocket_disconnect', payload);
 
+                    if (document.getElementById('Messages') && document.getElementById('Messages').parentElement && document.getElementById('Messages').parentElement.className === "Main") {
+                        const EventHTML = document.createElement('div');
+                        EventHTML.className = "Message UserEvent";
+                        const Gap = document.createElement('div');
+                        Gap.className = "gap";
+                        const Span = document.createElement('span');
+                        Span.className = "Msg Text";
+                        Span.style.color = "#b51515";
+
+                        Span.innerText = "[Chat] Twitch's service disconnected. Check your connection and refresh the page.";
+                        EventHTML.appendChild(Gap);
+                        EventHTML.appendChild(Span);
+                        document.getElementById('Messages').appendChild(EventHTML);
+                    }
                     break;
 
                 case 'revocation':
@@ -158,7 +172,7 @@ class initSocket {
             this.close();// close it and let it self loop
         }, (this.silenceTime * 1000));
     }
-    
+
     on(name, listener) {
         if (!this._events[name]) {
             this._events[name] = [];
@@ -180,28 +194,7 @@ class initSocket {
 }
 
 function log(msg) {
-    if (!document.getElementById('log')) {
-        return;
-    }
 
-    let div = document.createElement('div');
-    document.getElementById('log').prepend(div);
-
-    let tim = document.createElement('span');
-    div.append(tim);
-    let t = [
-        new Date().getHours(),
-        new Date().getMinutes(),
-        new Date().getSeconds()
-    ]
-    t.forEach((v,i) => {
-        t[i] = v < 10 ? '0'+v : v;
-    });
-    tim.textContent = t.join(':');
-
-    let sp = document.createElement('span');
-    div.append(sp);
-    sp.textContent = msg;
 }
 
 // setTimeout(() => {

@@ -4,6 +4,11 @@
 
 
 <h1 id="privacy-policy" style="text-align: center;">Privacy Policy</h1>
+
+<p style="color: yellow;">NOTICE: We are planning to update and restructure our privacy policy for our new dashboard. Be advised that our policies for data collection and storage will remain the same once we restructure.</p>
+<p style="color: yellow;">You can expect a new privacy policy by the start of September. We will let you know a specific date as soon as possible.</p>
+<hr>
+
 <p>Privacy Policy is for you to understand how this website collects, uses, and protects your personal information when
     you use our website or services.</p>
 <p>This Privacy Policy only affects the services that are visible on our homepage.</p>
@@ -148,7 +153,7 @@
 <p>Any contact, questions, concerns about this Privacy Policy shall be delivered to the contact email above.</p>
 
 <script>
-    if (location.search === "?consent_needed") {
+    if (location.search === "?consent_needed" || location.search === "?consent_needed_app") {
         // Add checkbox
         const Label = document.createElement('label');
         Label.className = "container";
@@ -161,59 +166,6 @@
         Label.append(InvisCheckbox);
         Label.append(Span);
 
-        // Google's OAuth 2.0 endpoint for requesting an access token
-        var oauth2Endpoint = 'https://accounts.google.com/o/oauth2/v2/auth';
-
-        // Create <form> element to submit parameters to OAuth 2.0 endpoint.
-        var form = document.createElement('form');
-        form.setAttribute('method', 'GET'); // Send as a GET request.
-        form.setAttribute('action', oauth2Endpoint);
-
-        let generateCryptoRandomState = () => {
-            const randomValues = new Uint32Array(2);
-            window.crypto.getRandomValues(randomValues);
-
-            // Encode as UTF-8
-            const utf8Encoder = new TextEncoder();
-            const utf8Array = utf8Encoder.encode(
-                String.fromCharCode.apply(null, randomValues)
-            );
-
-            // Base64 encode the UTF-8 data
-            return btoa(String.fromCharCode.apply(null, utf8Array))
-                .replace(/\+/g, '-')
-                .replace(/\//g, '_')
-                .replace(/=+$/, '');
-        };
-
-        const State = 'yt' + generateCryptoRandomState();
-        localStorage.setItem('state', State);
-
-        // Parameters to pass to OAuth 2.0 endpoint.
-        var params = {
-            'client_id': '597860444523-l87m271jorgmc0a9ea2vnn4ohqkmjphi.apps.googleusercontent.com',
-            'redirect_uri': 'https://seenwalex.wixsite.com/chat-live/_functions/Red',
-            'response_type': 'code',
-            'access_type': 'offline',
-            'scope': 'https://www.googleapis.com/auth/youtube',
-            'include_granted_scopes': 'true',
-            'state': State,
-            'prompt': 'consent'
-        };
-
-        // Add form parameters as hidden input values.
-        for (var p in params) {
-            var input = document.createElement('input');
-            input.setAttribute('type', 'hidden');
-            input.setAttribute('name', p);
-            input.setAttribute('value', params[p]);
-            form.appendChild(input);
-        }
-
-        form.appendChild(Label);
-
-        form.appendChild(document.createElement('br'));
-
         const Submit = document.createElement('input');
         Submit.type = "submit";
         Submit.value = "Continue";
@@ -221,14 +173,11 @@
         Submit.addEventListener('click', ev => {
             if (InvisCheckbox.checked) {
                 localStorage.setItem("consent_agreed", "true");
+                location.href = "./auth/start.html?type=YouTube" + (location.search === "?consent_needed_app" ? "&isapp=1" : "");
             }
         });
         InvisCheckbox.addEventListener('click', ev => {
             Submit.disabled = !InvisCheckbox.checked;
         });
-        form.appendChild(Submit);
-
-        // Add form to page and submit it to open the OAuth 2.0 endpoint.
-        document.body.appendChild(form);
     }
 </script>

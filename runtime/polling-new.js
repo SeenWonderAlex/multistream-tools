@@ -1,4 +1,4 @@
-var client_id = 'siayiyd16jh90e3j473ckuu2seoq0p';
+var client_id = 'b5d3338b79q2xza4zab9j5g9vhk7is';
 var redirect = (() => { let str = window.location.href; if (str.includes('?')) { str = str.split('?')[0]; } if (str.includes('#')) { str = str.split('#')[0]; } return str; })();
 var access_token = '';
 var socket_space = '';
@@ -24,6 +24,15 @@ var CapWarning = document.querySelector(".CapWarning");
 
 var MaxLength_Choice = 35;
 
+const IsIFrame = window.top !== window.self;
+
+if (IsIFrame) {
+    const Elements = ["#ConnectedPlatforms", "#YouTubeConnection", "#AuthRequired", "#TwitchChatDummyDoc", "#YTChatDummyDoc"]
+    for (const Element of Elements) {
+        document.querySelector(Element).classList.add("ForceHidden");
+    }
+}
+
 document.getElementById("authorize").addEventListener('click', (ev) => { b("AuthRequired").style.display = "none"; });
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -43,10 +52,10 @@ async function handleSavedToken() {
         getElementClass("Platform1").disabled = true;
         processToken(myParam);
     }
-    else if ((localStorage.getItem('saved_access_token')) != null) {
+    else if ((localStorage.getItem('saved_access_token_e')) != null) {
         IsConnectingToAccount = true;
         getElementClass("Platform1").disabled = true;
-        processToken(localStorage.getItem('saved_access_token'));
+        processToken(await EncStorage.getItem('saved_access_token'));
     }
     else {
         ConnectedPollID = "NONE";
@@ -98,7 +107,7 @@ async function handleSavedToken() {
     else if ((await EncStorage.getItem('ytsavedtoken')) != null) {
         IsConnectingToAccount = true;
         b('YouTubeConnection').style.display = "";
-        if ((await EncStorage.getItem('ytrefresh')) != null) {
+        if (!IsIFrame && (await EncStorage.getItem('ytrefresh')) != null) {
             InitRefresh((await EncStorage.getItem('ytrefresh')), -1)
                 .then(async (v) => {
                     if (!v) return Promise.reject("You must verify again to continue with YouTube");
@@ -129,12 +138,12 @@ function InitRefresh(rt, timeout = -1) {
     if (timeout === -1) {
         try {
             let TIME = ((new Date(localStorage.getItem('ytexpiresin')).getTime() - new Date().getTime())) - 20000;
-            if (TIME < 0) TIME = 0;
+            if (!IsIFrame) if (TIME < 0) TIME = 0;
             console.log("[YT] Token expires in " + (TIME / 1000))
             if (TIME <= 0) {
                 return Refresh(rt);
             }
-            setTimeout(() => { Refresh(rt); }, TIME);
+            if (!IsIFrame) setTimeout(() => { Refresh(rt); }, TIME);
             return Promise.resolve(true);
         } catch (error) {
             console.error(error);
@@ -147,7 +156,7 @@ function InitRefresh(rt, timeout = -1) {
     if (((timeout * 1000) - 20000) <= 0) {
         return Refresh(rt);
     }
-    setTimeout(() => { Refresh(rt); }, (timeout * 1000) - 20000);
+    if (!IsIFrame) setTimeout(() => { Refresh(rt); }, (timeout * 1000) - 20000);
     return Promise.resolve(true);
 }
 
@@ -478,6 +487,82 @@ function CheckPollUpdates() {
     });
 }
 
+function CheckPollUpdatesFromMC() {
+    if (ConnectedYTPoll == "NONE") {
+        console.warn("A poll isn't running anymore, ignoring request.");
+        return;
+    }
+    window.top.postMessage({ "type": "startReceiveYT" });
+}
+
+function Msg(ev) {
+    if (ev.data.type === "twNewToken") { // Renewed from Refresh Token
+        access_token = ev.data.t;
+    }
+    if (ev.data.type === "ytNewToken") { // Renewed from Refresh Token
+        YTAccessToken = ev.data.t;
+    }
+
+    if (ev.data.type === "ytChatReceived") {
+        const json = ev.data.data;
+
+        if (json.activePollItem != undefined && json.activePollItem.id == ConnectedYTPoll) { // Check if the poll is the same as the linked ID
+            SetYTPollRes(json.activePollItem);
+            if (WarningShown) {
+                b("WarningMessage").style.display = "none";
+                getElementClass("Warning").innerText = ".";
+                WarningShown = false;
+            }
+            return;
+        }
+        if (Array.isArray(json.items)) { // Check if there's a poll event that ended
+            const Messages = json.items;
+            for (const Message of Messages) {
+                if (Message.snippet.type === "pollEvent" && Message.id === ConnectedYTPoll && Message.snippet.pollDetails.status === "closed") {
+                    SetYTPollRes(Message);
+                    if (POLL_TYPE === "YT") // If it's a YT only poll, show the results
+                    {
+                        window.top.postMessage({ "type": "stopReceiveYT" });
+
+                        b('PollResultsDiv').style = "";
+                        b("CurrentPoll").style = "display: none;";
+                        clearInterval(IntervalIDForPoll);
+                        ConnectedYTPoll = "NONE";
+                        b("CreatePollEditor").style = "";
+                        b('Create').style = "";
+                        b('NewEditor').style = "display: none;";
+                        b('GetPresets').style = "display: none;";
+                        CalculateResults();
+                    }
+                    return;
+                }
+            }
+        }
+
+        // No more poll... We'll no longer send requests and set the YT poll ID to none.
+        ConnectedYTPoll = "NONE";
+        console.warn("[YT] A poll isn't running in YouTube anymore, previous results will remain the same for this session")
+
+        window.top.postMessage({ "type": "stopReceiveYT" });
+
+        if (POLL_TYPE === "YT") // If it's a YT only poll, show the results
+        {
+            document.removeEventListener("visibilitychange", OnPageShown);
+            b('PollResultsDiv').style = "";
+            b("CurrentPoll").style = "display: none;";
+            clearInterval(IntervalIDForPoll);
+            ConnectedYTPoll = "NONE";
+            b("CreatePollEditor").style = "";
+            b('Create').style = "";
+            b('NewEditor').style = "display: none;";
+            b('GetPresets').style = "display: none;";
+            CalculateResults();
+        }
+    }
+}
+
+if (window.top !== window.self) { window.top.addEventListener('message', Msg); }
+
 let WarningShown = false;
 
 function OnPageShown(ev) {
@@ -667,7 +752,7 @@ function verifyYTToken(token) {
             const InvisCheckbox = document.createElement('input');
             InvisCheckbox.type = "checkbox";
             let Click = (ev) => {
-                if (InvisCheckbox.checked) {
+                if (InvisCheckbox.checked && !IsIFrame) {
                     b("YTChatDummyDoc").style.display = "";
                     b("YTChatDummyDoc").src = b("YTChatDummyDoc").getAttribute("data-link") ?? "about:blank";
                 }
@@ -725,6 +810,13 @@ function verifyYTToken(token) {
             EncStorage.setItem('ytsavedtoken', token);
         })
         .catch(err => {
+            if (err.error && err.error.errors) {
+                if (err.error.errors[0].reason === "quotaExceeded") {
+                    ConnectedYTPoll = "NONE";
+                    b('YouTubeConnection').innerHTML = "YouTube is unavailable for the rest of the day. We are currently limited, as we have a small quota.";
+                    return;
+                }
+            }
             ConnectedYTPoll = "NONE";
             console.error("YouTube Authentication Failed: ", err);
             EncStorage.removeItem('ytsavedtoken');
@@ -907,7 +999,7 @@ function SubmitPoll() {
             ConnectedYTPoll = json.id;
             Retries = 2;
             SetYTPollRes(json);
-            CheckPollUpdates();
+            if (IsIFrame) CheckPollUpdatesFromMC(); else CheckPollUpdates();
         }).catch(err => {
             console.error(err);
         });
@@ -1051,6 +1143,7 @@ function UpdatePollResponses() {
                             b("PleaseWait").style = "display: none;";
                             SetYTPollRes(await res.json());
                         } finally {
+                            window.top.postMessage({ "type": "stopReceiveYT" });
                             CalculateResults();
                         }
                     }).catch(err => {
@@ -1282,7 +1375,7 @@ function processToken(token) {
         }
     )
         .then(resp => resp.json())
-        .then(resp => {
+        .then(async resp => {
             if (resp.error != undefined) {
                 return Promise.reject(resp.error + ": " + resp.message);
             }
@@ -1293,7 +1386,7 @@ function processToken(token) {
             if (document.querySelectorAll("#ConnectedPlatforms > span")[0]) {
                 document.querySelectorAll("#ConnectedPlatforms > span")[0].innerText = resp.data[0].display_name;
             }
-            localStorage.setItem("saved_access_token", token);
+            await EncStorage.setItem("saved_access_token", token);
 
             b("Display_C2").style.display = "";
             b("CB_TTV").checked = true;
@@ -1350,7 +1443,7 @@ function processToken(token) {
             const InvisCheckbox = document.createElement('input');
             InvisCheckbox.type = "checkbox";
             let Click = (ev) => {
-                if (InvisCheckbox.checked) {
+                if (InvisCheckbox.checked && !IsIFrame) {
                     b("TwitchChatDummyDoc").style.display = "";
                     b("TwitchChatDummyDoc").src = "https://www.twitch.tv/embed/" + resp.data[0].login + "/chat?parent=" + location.hostname
                 }
@@ -1459,6 +1552,7 @@ function processToken(token) {
                                 b('GetPresets').style = "display: none;";
                                 SetYTPollRes(await res.json());
                             } finally {
+                                window.top.postMessage({ "type": "stopReceiveYT" });
                                 CalculateResults();
                             }
                         }).catch(err => {
@@ -1467,31 +1561,31 @@ function processToken(token) {
                     }
                 }, 2000);
             });
-            socket_space.on('channel.channel_points_custom_reward_redemption.add', (msg) => {
-                let { metadata, payload } = msg;
-                if (PastMessageIDs.includes(metadata.message_id)) {
-                    console.error("Ignored Add Redemption event due to duplicate message IDs (this is due to Twitch probably re-sending events)");
-                    return;
-                }
-                if (GetRedemptionData(payload.event.id) != null) {
-                    console.error("Ignored Add Redemption event due to duplicate redemption IDs (this is due to Twitch probably re-sending events)");
-                    return;
-                }
-                AddRedemption(payload.event);
-            });
-            socket_space.on('channel.channel_points_custom_reward_redemption.update', (msg) => {
-                let { metadata, payload } = msg;
-                let { event } = payload;
-                if (PastMessageIDs.includes(metadata.message_id)) {
-                    console.error("Ignored Update Status event due to duplicate message IDs (this is due to Twitch probably re-sending events)");
-                    return;
-                }
-                if (GetRedemptionData(payload.event.id) == null) {
-                    AddRedemption(payload.event);
-                    return;
-                }
-                UpdateRedemption(payload.event);
-            });
+            // socket_space.on('channel.channel_points_custom_reward_redemption.add', (msg) => {
+            //     let { metadata, payload } = msg;
+            //     if (PastMessageIDs.includes(metadata.message_id)) {
+            //         console.error("Ignored Add Redemption event due to duplicate message IDs (this is due to Twitch probably re-sending events)");
+            //         return;
+            //     }
+            //     if (GetRedemptionData(payload.event.id) != null) {
+            //         console.error("Ignored Add Redemption event due to duplicate redemption IDs (this is due to Twitch probably re-sending events)");
+            //         return;
+            //     }
+            //     AddRedemption(payload.event);
+            // });
+            // socket_space.on('channel.channel_points_custom_reward_redemption.update', (msg) => {
+            //     let { metadata, payload } = msg;
+            //     let { event } = payload;
+            //     if (PastMessageIDs.includes(metadata.message_id)) {
+            //         console.error("Ignored Update Status event due to duplicate message IDs (this is due to Twitch probably re-sending events)");
+            //         return;
+            //     }
+            //     if (GetRedemptionData(payload.event.id) == null) {
+            //         AddRedemption(payload.event);
+            //         return;
+            //     }
+            //     UpdateRedemption(payload.event);
+            // });
         })
         .catch(err => {
             console.error(err);
@@ -1499,7 +1593,7 @@ function processToken(token) {
             ConnectedPollID = "NONE";
 
             log('Error with Users Call');
-            localStorage.removeItem("saved_access_token");
+            EncStorage.removeItem("saved_access_token");
             document.getElementById("AuthRequired").style = '';
             if (err === "not_a_affiliate") {
                 b("AuthRequired").className = "Oops";
@@ -1518,6 +1612,7 @@ function processToken(token) {
             getElementClass("Platform1").addEventListener('click', (ev) => {
                 const State = ('ttv' + generateCryptoRandomState());
                 localStorage.setItem('state', State);
+                //location.href = 'https://id.twitch.tv/oauth2/authorize?client_id=' + client_id + '&redirect_uri=' + encodeURIComponent(redirect) + '&response_type=token&scope=clips:edit+chat:read+chat:edit+channel:moderate+channel:read:subscriptions+moderation:read+channel:edit:commercial+channel:read:hype_train+channel:manage:broadcast+channel:manage:redemptions+channel:manage:polls+channel:manage:predictions+moderator:manage:automod+moderator:read:automod_settings+moderator:manage:banned_users+moderator:manage:blocked_terms+moderator:manage:chat_settings+channel:manage:raids+moderator:manage:announcements+moderator:manage:chat_messages+channel:manage:moderators+moderator:read:vips+moderator:read:moderators+channel:manage:vips+moderator:read:chatters+moderator:manage:shield_mode+moderator:manage:shoutouts+moderator:read:followers+user:read:chat+channel:manage:ads+user:write:chat+user:read:emotes+moderator:manage:unban_requests+moderator:read:suspicious_users+moderator:manage:warnings+channel:read:ads&state=' + State;
                 location.href = 'https://id.twitch.tv/oauth2/authorize?client_id=' + client_id + '&redirect_uri=' + encodeURIComponent(redirect) + '&response_type=token&scope=channel:read:redemptions+channel:manage:polls+channel:read:polls&state=' + State;
             });
             getElementClass("Platform1").addEventListener('contextmenu', (ev) => {
@@ -1651,9 +1746,9 @@ function requestHooks(user_id) {
     let topics = {
         'channel.poll.begin': { version: '1', condition: { broadcaster_user_id: user_id } },
         'channel.poll.progress': { version: '1', condition: { broadcaster_user_id: user_id } },
-        'channel.poll.end': { version: '1', condition: { broadcaster_user_id: user_id } },
-        'channel.channel_points_custom_reward_redemption.add': { version: '1', condition: { broadcaster_user_id: user_id } },
-        'channel.channel_points_custom_reward_redemption.update': { version: '1', condition: { broadcaster_user_id: user_id } }
+        'channel.poll.end': { version: '1', condition: { broadcaster_user_id: user_id } }//,
+        // 'channel.channel_points_custom_reward_redemption.add': { version: '1', condition: { broadcaster_user_id: user_id } },
+        // 'channel.channel_points_custom_reward_redemption.update': { version: '1', condition: { broadcaster_user_id: user_id } }
     }
 
     log(`Spawn Topics for ${user_id}`);

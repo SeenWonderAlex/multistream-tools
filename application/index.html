@@ -1,0 +1,102 @@
+<html>
+
+<head>
+    <title>Multistream Tools - Dashboard</title>
+    <link rel="stylesheet" href="../style.css" />
+    <link rel="stylesheet" href="cdn/dashboard.css" />
+    <link rel="icon" type="image/x-icon" href="../favicon.ico">
+</head>
+
+<body>
+    <details id="ConnectedPlatforms" open>
+        <summary>Connected Accounts</summary>
+        <div>
+            <img width="20" height="20" draggable="false" src="cdn/glitch_flat_purple.svg">
+            <span>Twitch</span>
+            <button class="Platform1">Connect</button>
+        </div>
+        <div>
+            <img width="20" height="20" draggable="false" src="cdn/yt_icon_rgb.webp">
+            <span>YouTube</span>
+            <button class="Platform2">Connect</button>
+        </div>
+        <div>
+            <img width="20" height="22" draggable="false" src="cdn/kick_icon.svg">
+            <span>Kick</span>
+            <button class="Platform3">Connect</button>
+        </div>
+    </details>
+    <details id="YouTubeConnectionURL" open style="display: none;">
+        <summary>Your YouTube Stream</summary>
+        <span>Load your recent stream or type your YouTube Stream URL:</span>
+        <br>
+        <input id="YouTubeURL" class="YU1" type="url">
+        <button onclick="LoadURL();" class="YU2">Load</button>
+        <button id="YUHandler" class="YU2 YU3">Load from Recent</button>
+    </details>
+
+    <div id="Dashboard">
+        <hr>
+        <div class="Title">
+            <span>Dashboard</span>
+        </div>
+        <div class="Panels">
+            <div id="MultistreamChat" class="Panel">
+                <div class="Header">
+                    <span>Multistream Chat</span>
+                    <button class="Popout">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 5 38 37">
+                            <path
+                                d="M0 17 22 17C24 18 24 20 22 21L4 21 4 38 22 38 22 25C23 23 25 23 26 25L26 42 0 42 0 17M25 19 29 22 34 14 38 17 37 5 26 9 30 11 25 19"
+                                fill="#FFFFFF" />
+                        </svg>
+                    </button>
+                    <button class="Collapse">
+                        <span></span>
+                    </button>
+                </div>
+                <iframe src="about:blank"></iframe>
+            </div>
+
+            <div id="FullSize">
+                
+            </div>
+
+            <div id="CombinedViews" class="Panel">
+                <div class="Header">
+                    <span>Total Viewers</span>
+                    <button class="Collapse">
+                        <span></span>
+                    </button>
+                </div>
+                <div class="Content">
+                    <span class="CVTotal">-</span>
+                    <hr>
+                    <div class="CVPlatforms">
+                        <div id="CVTwitch" style="display: none;">
+                            <img width="20" height="20" draggable="false" src="cdn/glitch_flat_purple.svg">
+                            <span>Twitch</span>
+                            <a>-</a>
+                        </div>
+                        <div id="CVYouTube" style="display: none;">
+                            <img width="20" height="20" draggable="false" src="cdn/yt_icon_rgb.webp">
+                            <span>YouTube</span>
+                            <a>-</a>
+                        </div>
+                        <div id="CVKick" style="display: none;">
+                            <img width="20" height="22" draggable="false" src="cdn/kick_icon.svg">
+                            <span>Kick</span>
+                            <a>-</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../runtime/utils/encryption.js"></script>
+    <script src="../runtime/utils/src-5fa9F4.js"></script>
+    <script src="src/dashboard.js"></script>
+</body>
+
+</html>
