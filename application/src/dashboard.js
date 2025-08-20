@@ -536,7 +536,7 @@ function InitializeTitleWidget() {
     const SubmitButton = document.createElement('button');
     SubmitButton.innerText = "Change & Apply";
     SubmitButton.addEventListener('click', (ev) => {
-        if (Field.length <= 0) return;
+        if (Field.value.trim().length <= 0) return;
         if (KickField && KickField.value.length <= 0) {
             return;
         }
@@ -568,7 +568,7 @@ function InitializeTitleWidget() {
                     "Client-Id": client_id
                 },
                 "body": JSON.stringify({
-                    "title": Title || "TITLE NOT SET!"
+                    "title": Title.trim() || "TITLE NOT SET!"
                 })
             }).then(res => {
                 if (res.ok) {
@@ -602,7 +602,7 @@ function InitializeTitleWidget() {
                 "body": JSON.stringify({
                     "id": LinkId,
                     "snippet": {
-                        "title": Title || "TITLE NOT SET!",
+                        "title": Title.trim() || "TITLE NOT SET!",
                         "categoryId": YTCategoryId
                     }
                 })
@@ -636,7 +636,7 @@ function InitializeTitleWidget() {
                     "Content-Type": "application/json"
                 },
                 "body": JSON.stringify({
-                    "stream_title": Title || "TITLE NOT SET!"
+                    "stream_title": Title.trim() || "TITLE NOT SET!"
                 })
             }).then(res => {
                 if (res.ok) {
