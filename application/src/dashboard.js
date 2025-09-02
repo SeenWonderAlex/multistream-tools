@@ -665,6 +665,11 @@ let Count2 = 0;
 let Count3 = 0;
 
 function UpdateCombinedViewsCount() {
+    if (document.hidden)
+    {
+        IntervalUpdate = setTimeout(UpdateCombinedViewsCount, 500);
+        return;
+    }
     const TotalCount = document.querySelector(".CVTotal");
 
     let IsChecked1 = access_token.length <= 0;
@@ -699,7 +704,7 @@ function UpdateCombinedViewsCount() {
                 return Promise.reject("Not live!");
             }
             IsChecked1 = true;
-            Count1 = json.data[0].viewer_count;
+            Count1 = parseInt(json.data[0].viewer_count);
             TTVCount.querySelector('a').innerText = Count1.toLocaleString();
             TTVCount.querySelector('a').classList.remove("NotLive");
 
@@ -758,7 +763,7 @@ function UpdateCombinedViewsCount() {
                 return Promise.reject("Not live!");
             }
             IsChecked2 = true;
-            Count2 = json.items[0].liveStreamingDetails.concurrentViewers;
+            Count2 = parseInt(json.items[0].liveStreamingDetails.concurrentViewers);
             YTCount.querySelector('a').innerText = Count2.toLocaleString();
             YTCount.querySelector('a').classList.remove("NotLive");
 
@@ -814,7 +819,7 @@ function UpdateCombinedViewsCount() {
                 return Promise.reject("Not live!");
             }
             IsChecked3 = true;
-            Count3 = json.data[0].viewer_count;
+            Count3 = parseInt(json.data[0].viewer_count);
             KickCount.querySelector('a').innerText = Count3.toLocaleString();
             KickCount.querySelector('a').classList.remove("NotLive");
 
@@ -1077,6 +1082,9 @@ function verifyYTToken(token) {
                         EncStorage.removeItem('ytrefresh');
                         location.reload();
                     });
+                    const errorText = document.createElement('a');
+                    errorText.innerText = "Service is unavailable for the rest of the day, as we reached our daily quota.";
+                    document.querySelector(".Platform2").parentElement.appendChild(errorText);
                     console.warn("Authentication is held due to exceeding the quota.");
                     return;
                 }
