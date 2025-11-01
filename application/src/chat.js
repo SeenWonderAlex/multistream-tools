@@ -624,7 +624,7 @@ let MyName = "";
 
 let JustClearedChat = false;
 
-function HandleCommand(command = "/format :TW=name: args1 args2") {
+function HandleCommand(command = "/format :TTV:name: args1 args2") {
     const args = command.split(' ');
     const commandName = args.shift();
     switch (commandName) {
@@ -1298,8 +1298,8 @@ function HandleMessage(Payload) {
                     if (Payload.platform === "Kick") {
                         const ERROR = (ev) => {
                             a.querySelector("img.PFP").removeEventListener('error', ERROR);
-                            ev.target.src = "https://kick.com/img/default-profile-pictures/default2.jpeg";
-                            CachedKPFPs[Payload.person.id] = "https://kick.com/img/default-profile-pictures/default2.jpeg";
+                            ev.target.src = "https://files.kick.com/images/profile_image/default1.jpeg";
+                            CachedKPFPs[Payload.person.id] = "https://files.kick.com/images/profile_image/default1.jpeg";
                         };
                         a.querySelector("img.PFP").addEventListener('error', ERROR);
                     }
@@ -2901,7 +2901,7 @@ function handleKickSupport() {
                     if (SubEvent.gifter.is_anonymous) {
                         SubEvent.gifter.username = "Anonymous Gifter";
                         SubEvent.gifter.channel_slug = "anonymous"
-                        SubEvent.gifter.profile_picture = "https://kick.com/img/default-profile-pictures/default2.jpeg";
+                        SubEvent.gifter.profile_picture = "https://files.kick.com/images/profile_image/default1.jpeg";
                         SubEvent.gifter.user_id = 2994;
                     }
 
