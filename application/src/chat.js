@@ -2124,6 +2124,13 @@ let CachedBanIds = {};
 async function HandleYTMessages(Messages = [], Duration = 0) {
     if (Messages.length > 10 || Messages.length === 1) Duration = 0;
 
+    const RemoveAtSymbol = (str) => {
+        if (str.startsWith("@"))
+        {
+            str = str.substring(1);
+        }
+    };
+
     const LastHour = new Date().getTime() - (1000 * 60 * 60);
     for (const Message of Messages) {
         if (Message.snippet.publishedAt && (LastHour > new Date(Message.snippet.publishedAt).getTime())) {
@@ -2141,7 +2148,7 @@ async function HandleYTMessages(Messages = [], Duration = 0) {
                     "id": Message.id,
                     "message": null,
                     "person": {
-                        "username": Message.authorDetails.displayName,
+                        "username": RemoveAtSymbol(Message.authorDetails.displayName),
                         "profilePicture": Message.authorDetails.profileImageUrl,
                         "id": Message.authorDetails.channelId
                     },
@@ -2199,7 +2206,7 @@ async function HandleYTMessages(Messages = [], Duration = 0) {
                     if (ChatSettings.ModAppearance.LogModerationActions)
                         HandleMessage({
                             "type": "event",
-                            "message": `${Message.authorDetails.displayName} deleted ${username}'s message`,
+                            "message": `${RemoveAtSymbol(Message.authorDetails.displayName)} deleted ${username}'s message`,
                             "match_if_needed": "YTDELETE:" + Snippet2.messageDeletedDetails.deletedMessageId
                         })
 
@@ -2220,7 +2227,7 @@ async function HandleYTMessages(Messages = [], Duration = 0) {
                 const BanDetails = BanSnippet.userBannedDetails;
                 // Clear chat messages
                 let values = Array.from(document.querySelectorAll('.Username.Text'))
-                    .filter(el => el.textContent === BanDetails.bannedUserDetails.displayName);
+                    .filter(el => el.textContent === RemoveAtSymbol(BanDetails.bannedUserDetails.displayName));
                 for (let val of values) {
                     const d = val.parentElement.querySelector('.ModActions > .Delete');
                     if (d) {
@@ -2266,7 +2273,7 @@ async function HandleYTMessages(Messages = [], Duration = 0) {
                     if (ChatSettings.ModAppearance.LogModerationActions)
                         HandleMessage({
                             "type": "event",
-                            "message": `${Message.authorDetails.displayName} timed out ${BanDetails.bannedUserDetails.displayName} for ${getAmount()}`,
+                            "message": `${RemoveAtSymbol(Message.authorDetails.displayName)} timed out ${RemoveAtSymbol(BanDetails.bannedUserDetails.displayName)} for ${getAmount()}`,
                             "undo": () => {
                                 return fetch('https://www.googleapis.com/youtube/v3/liveChat/bans?part=snippet', {
                                     "method": "POST",
@@ -2302,7 +2309,7 @@ async function HandleYTMessages(Messages = [], Duration = 0) {
                 else {
                     let banTemplate = {
                         "type": "event",
-                        "message": `${Message.authorDetails.displayName} hid ${BanDetails.bannedUserDetails.displayName} from the channel`,
+                        "message": `${RemoveAtSymbol(Message.authorDetails.displayName)} hid ${RemoveAtSymbol(BanDetails.bannedUserDetails.displayName)} from the channel`,
                         "match_if_needed": `YTBAN:${BanDetails.bannedUserDetails.channelId}`
                     };
                     if (id.length > 0) {
@@ -2352,7 +2359,7 @@ async function HandleYTMessages(Messages = [], Duration = 0) {
                     "id": Message.id,
                     "message": null,
                     "person": {
-                        "username": Message.authorDetails.displayName,
+                        "username": RemoveAtSymbol(Message.authorDetails.displayName),
                         "profilePicture": Message.authorDetails.profileImageUrl,
                         "id": Message.authorDetails.channelId
                     },
