@@ -2129,6 +2129,7 @@ async function HandleYTMessages(Messages = [], Duration = 0) {
         {
             str = str.substring(1);
         }
+        return str;
     };
 
     const LastHour = new Date().getTime() - (1000 * 60 * 60);
