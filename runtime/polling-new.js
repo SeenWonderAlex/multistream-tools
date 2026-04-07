@@ -163,7 +163,7 @@ function InitRefresh(rt, timeout = -1) {
 function Refresh(rt) {
     localStorage.removeItem('ytexpiresin');
     EncStorage.removeItem('ytrefresh');
-    return fetch('https://seenwalex.wixsite.com/chat-live/_functions/GAPI/Refresh', {
+    return fetch('https://multistream-tools.onrender.com/RefreshAccess/YouTube', {
         "method": "POST",
         "headers": {
             "Content-Type": "application/json"
@@ -271,7 +271,6 @@ function AddOption() {
         }
 
         if (WarningShown) Warning.remove();
-        delete WarningShown;
         Warning = null;
     });
     Options.append(option);
@@ -353,7 +352,6 @@ function DeletePreset() {
     let Preset = Presets[Value];
     if (Preset != undefined) {
         Presets[Value] = undefined;
-        delete Preset;
         SaveToLocalStorage();
         ShowPresets();
     }

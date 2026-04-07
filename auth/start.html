@@ -55,7 +55,7 @@
             localStorage.setItem('kstate', state);
 
             const redirect_uri = encodeURIComponent(location.protocol + "//" + location.host + location.pathname.replace("start", "complete"));
-            location.replace(`https://id.kick.com/oauth/authorize?client_id=01K21B2JMB2GNMK1R7PYMKMJXB&response_type=code&redirect_uri=${redirect_uri}&state=${state}&code_challenge_method=S256&code_challenge=${code_challenge}&scope=user:read+channel:read+channel:write+chat:write+events:subscribe+moderation:ban`);
+            location.replace(`https://id.kick.com/oauth/authorize?client_id=01K21B2JMB2GNMK1R7PYMKMJXB&response_type=code&redirect_uri=${redirect_uri}&state=${state}&code_challenge_method=S256&code_challenge=${code_challenge}&scope=user:read+channel:read+channel:write+chat:write+events:subscribe+moderation:ban+moderation:chat_message:manage`);
         }
 
         //const RedirectTo = localStorage.getItem("RedirectTo");
@@ -65,6 +65,7 @@
                 localStorage.setItem("RedirectTo", query.has("isapp") ? "app" : "../application/");
             }
             if (query.has("type")) {
+                const IsLocalHost = location.hostname === "localhost"; // Is in a development testing environment?
                 switch (query.get("type")) {
                     case "Kick":
                         KickSubmit();
@@ -72,11 +73,8 @@
                     case "Twitch":
                         const State = ('ttv' + getRandomString());
                         localStorage.setItem('state', State);
-
-                        const IsLocalHost = location.hostname === "localhost"; // Is in a development testing environment?
-                        const redirect_uri = "https://seenwalex.wixsite.com/chat-live/_functions/CompleteAuth/Twitch" + (IsLocalHost ? "/ToLocalHost" : "");
-
-                        location.replace('https://id.twitch.tv/oauth2/authorize?client_id=b5d3338b79q2xza4zab9j5g9vhk7is&redirect_uri=' + encodeURIComponent(redirect_uri) + '&response_type=code&scope=clips:edit+chat:read+chat:edit+channel:moderate+channel:read:subscriptions+moderation:read+channel:edit:commercial+channel:read:hype_train+channel:manage:broadcast+channel:manage:redemptions+channel:manage:polls+channel:manage:predictions+moderator:manage:automod+moderator:read:automod_settings+moderator:manage:banned_users+moderator:manage:blocked_terms+moderator:manage:chat_settings+channel:manage:raids+moderator:manage:announcements+moderator:manage:chat_messages+channel:manage:moderators+moderator:read:vips+moderator:read:moderators+channel:manage:vips+moderator:read:chatters+moderator:manage:shield_mode+moderator:manage:shoutouts+moderator:read:followers+user:read:chat+channel:manage:ads+user:write:chat+user:read:emotes+moderator:manage:unban_requests+moderator:read:suspicious_users+moderator:manage:warnings+channel:read:ads&state=' + State);
+                        const redirect_uri = "https://multistream-tools.onrender.com/CompleteAuth/Twitch" + (IsLocalHost ? "?localhost" : "");
+                        location.replace('https://id.twitch.tv/oauth2/authorize?client_id=b5d3338b79q2xza4zab9j5g9vhk7is&redirect_uri=' + encodeURIComponent(redirect_uri) + '&response_type=code&scope=chat:read+chat:edit+channel:moderate+channel:read:subscriptions+moderation:read+channel:manage:broadcast+channel:read:redemptions+channel:manage:polls+moderator:manage:banned_users+moderator:read:blocked_terms+moderator:manage:chat_settings+channel:manage:raids+moderator:manage:announcements+moderator:manage:chat_messages+channel:manage:moderators+moderator:read:vips+moderator:read:moderators+channel:manage:vips+moderator:manage:shoutouts+user:read:chat+user:write:chat+user:read:emotes+moderator:manage:warnings+moderator:read:unban_requests&state=' + State);
                         return;
                     case "YouTube":
                         const YTState = ('yt' + getRandomString());
@@ -85,7 +83,7 @@
                         // Parameters to pass to OAuth 2.0 endpoint.
                         var params = new URLSearchParams({
                             'client_id': '597860444523-l87m271jorgmc0a9ea2vnn4ohqkmjphi.apps.googleusercontent.com',
-                            'redirect_uri': 'https://seenwalex.wixsite.com/chat-live/_functions/Red',
+                            'redirect_uri': "https://multistream-tools.onrender.com/CompleteAuth/YouTube" + (IsLocalHost ? "?localhost" : ""),
                             'response_type': 'code',
                             'access_type': 'offline',
                             'scope': 'https://www.googleapis.com/auth/youtube',

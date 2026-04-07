@@ -285,10 +285,13 @@ function SetupDashboard() {
                     CancelSignal.abort();
                 }
             }
+            localStorage.setItem("cv_collapsed", "true");
         }
         else {
             button.classList.remove("Collapsed");
             button.parentElement.parentElement.classList.remove("Collapse");
+
+            localStorage.setItem("cv_collapsed", "false");
 
             // Combined Views Count
             if (WaitFor1 && WaitFor2 && WaitFor3)
@@ -297,6 +300,22 @@ function SetupDashboard() {
     });
 
     InitializeButtons();
+
+    if (localStorage.getItem("cv_collapsed") == "true")
+    {
+        const button = document.querySelector("#CombinedViews").querySelector(".Collapse");
+        if (!button.classList.contains("Collapsed")) {
+            button.classList.add("Collapsed");
+            button.parentElement.parentElement.classList.add("Collapse");
+
+            clearInterval(IntervalUpdate);
+            if (CancelSignals.length > 0) {
+                for (let CancelSignal of CancelSignals) {
+                    CancelSignal.abort();
+                }
+            }
+        }
+    }
 
     // Combined Views Count
     UpdateCombinedViewsCount();
@@ -1215,7 +1234,7 @@ function InitRefresh(rt) {
 function Refresh(rt) {
     localStorage.removeItem('ytexpiresin');
     EncStorage.removeItem('ytrefresh');
-    return fetch('https://seenwalex.wixsite.com/chat-live/_functions/GAPI/Refresh', {
+    return fetch('https://multistream-tools.onrender.com/RefreshAccess/YouTube', {
         "method": "POST",
         "headers": {
             "Content-Type": "application/json"
@@ -1258,7 +1277,7 @@ async function TWRefresh(rt) {
     if (rt === null) rt = await EncStorage.getItem('saved_refresh_token');
     localStorage.removeItem('saved_expiresin');
     EncStorage.removeItem('saved_refresh_token');
-    return fetch('https://seenwalex.wixsite.com/chat-live/_functions/TWAPI/Refresh', {
+    return fetch('https://multistream-tools.onrender.com/RefreshAccess/Twitch', {
         "method": "POST",
         "headers": {
             "Content-Type": "application/json"
@@ -1301,7 +1320,7 @@ async function KickRefresh(rt) {
     if (rt === null) { rt = await EncStorage.getItem('kkrefresh'); }
     localStorage.removeItem('kkexpiresin');
     EncStorage.removeItem('kkrefresh');
-    return fetch('https://seenwalex.wixsite.com/chat-live/_functions/KickAPI/Refresh', {
+    return fetch('https://multistream-tools.onrender.com/RefreshAccess/Kick', {
         "method": "POST",
         "headers": {
             "Content-Type": "application/json"

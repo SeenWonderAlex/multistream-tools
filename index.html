@@ -4,26 +4,36 @@
     <title>Multistream Tools</title>
     <link rel="stylesheet" href="./style.css" />
     <link rel="icon" type="image/x-icon" href="./favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body {
             background-color: rgb(28, 28, 28);
         }
 
+        a {
+           color: rgb(111, 32, 231);
+        }
+
+
         .footer {
             position: fixed;
             bottom: 0;
-            background-color: black;
+            background-color: rgb(12, 12, 12);
             width: 100%;
             left: 0;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
         }
 
-        .footer>span {
-            float: right;
-            display: block;
-            position: absolute;
-            top: 17px;
-            right: 5px;
-            color: yellow;
+        .footer>.content {
+            margin: 15px;
+            height: 100%;
+            width: 100%;
+            display: flex;
+        }
+
+        .footer>.content>span {
+            flex: 1 1 auto;
         }
 
         .Logo {
@@ -82,20 +92,23 @@
         <span class="Title">Multistream Tools</span>
         <br>
         <hr>
-        <span style="font-size: 18px;">Moderate and multiple platforms at once!<br>Combined Chats, Polls, & Other Free Tools!<br> Supports
+        <span style="font-size: 18px;">Moderate and multiple platforms at once!<br>Combined Chats, Polls, & Other Free
+            Tools!<br> Supports
         </span><span style="font-size: 18px; font-weight: bold;">YouTube, Twitch, Kick</span> <span
             style="font-size: 18px;">using the Public API. No account required!</span>
         <br>
-        <a class="Button" href="application/">Dashboard</a>
+        <a class="Button" href="https://multistream-tools.onrender.com/CheckStatusAndGoToDashboard">Dashboard</a>
     </div>
 
     <br><br>
 
-    <span class="Temp">Please be advised, we are in the process of re-designing the website. The new dashboard is available, but our policies haven't been updated. Our privacy statement of storing your data in local browser is still valid. We will never collect any data ourselves.</span>
+    <span class="Temp">Home page is under construction. Special thanks to GitHub Pages, Pusher.com (to handle messages with Kick API), and Render.com (Backend Service) for being generous with their free tiers. More features coming soon. If you would like to contact me, please use Twitter or Discord from my <a href="https://linktr.ee/seenwonderalex">Linktree</a>.<br><br>YouTube is currently not available as I need to resubmit for verification, and I am procastinating because no one uses this website. If you are really in the need for this, contact me as soon as possible and I will get it done.</span>
     <div class="footer">
-        <p style="background: none;">Developed by SeenWonderAlex <a
-                href="./privacy.html">Privacy Policy</a></p>
-        <span>New Policies WIP</span>
+        <div class="content">
+            <span style="background: none;">© 2026 SeenWonderAlex</span>
+             <span style="display: flex; justify-content: center; align-items: center;"><a style="text-align: center; color: white;" href="https://github.com/SeenWonderAlex/multistream-tools" target="_blank">Report Bugs & Feature Requests</a></span>
+            <span><a style="float: right; text-align: right; margin-right: 30px;" href="./privacy.html">Privacy Policy</a></span>
+        </div>
     </div>
 </body>
 

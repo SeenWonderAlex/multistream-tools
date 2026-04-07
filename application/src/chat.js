@@ -683,6 +683,26 @@ function HandleCommand(command = "/format :TTV:name: args1 args2") {
                 });
             }
             break;
+        case "/announce":
+            inputField.innerText = "📢 " + args.join(" ");
+            SubmitMessage(1);
+            break;
+        case "/announceblue":
+            inputField.innerText = "📢 " + args.join(" ");
+            SubmitMessage(2);
+            break;
+        case "/announcegreen":
+            inputField.innerText = "📢 " + args.join(" ");
+            SubmitMessage(3);
+            break;
+        case "/announceorange":
+            inputField.innerText = "📢 " + args.join(" ");
+            SubmitMessage(4);
+            break;
+        case "/announcepurple":
+            inputField.innerText = "📢 " + args.join(" ");
+            SubmitMessage(5);
+            break;
         default:
             HandleMessage({
                 "type": "event",
@@ -692,7 +712,7 @@ function HandleCommand(command = "/format :TTV:name: args1 args2") {
     }
 }
 
-function SubmitMessage() {
+function SubmitMessage(IsAnnouncement = 0) {
     let MessageInput = (inputField.innerText || "").trim();
     if (MessageInput.length <= 0) return;
     inputField.innerText = "";
@@ -728,45 +748,88 @@ function SubmitMessage() {
     HandleMessage(JsonTemplate);
 
     if (access_token.length > 0) {
-        fetch('https://api.twitch.tv/helix/chat/messages', {
-            "method": "POST",
-            "headers": {
-                "Client-ID": client_id,
-                "Authorization": "Bearer " + access_token,
-                'Content-Type': 'application/json'
-            },
-            "body": JSON.stringify({
-                "broadcaster_id": user_id,
-                "sender_id": user_id,
-                "message": MessageInput
-            })
-        }).then(res => {
-            return res.json();
-        }).then(json => {
-            if (!json.data) {
-                return Promise.reject(json);
-            }
-            const data = json.data[0];
-            ExcludeMessageIds[data.id] = true;
-            if (!data.is_sent) {
+        if (IsAnnouncement == 0) {
+            fetch('https://api.twitch.tv/helix/chat/messages', {
+                "method": "POST",
+                "headers": {
+                    "Client-ID": client_id,
+                    "Authorization": "Bearer " + access_token,
+                    'Content-Type': 'application/json'
+                },
+                "body": JSON.stringify({
+                    "broadcaster_id": user_id,
+                    "sender_id": user_id,
+                    "message": MessageInput
+                })
+            }).then(res => {
+                return res.json();
+            }).then(json => {
+                if (!json.data) {
+                    return Promise.reject(json);
+                }
+                const data = json.data[0];
+                ExcludeMessageIds[data.id] = true;
+                if (!data.is_sent) {
+                    HandleMessage({
+                        "type": "event",
+                        "message": "Twitch: " + data.drop_reason.message
+                    });
+                }
+                else {
+                    console.log("[Multistream Chat] Success on sending message (Twitch)");
+                    const a = document.querySelector('div[data-id="' + MessageId + '"]');
+                    if (a) {
+                        a.setAttribute("data-ttv", data.message_id);
+                    }
+                }
+            }).catch(err => {
                 HandleMessage({
                     "type": "event",
-                    "message": "Twitch: " + data.drop_reason.message
+                    "message": `Failed to send Twitch message: ${err}`
                 });
-            }
-            else {
-                console.log("[Multistream Chat] Success on sending message (Twitch)");
-                const a = document.querySelector('div[data-id="' + MessageId + '"]');
-                if (a) {
-                    a.setAttribute("data-ttv", data.message_id);
-                }
-            }
-        }).catch(err => {
-            HandleMessage({
-                "type": "event",
-                "message": `Failed to send Twitch message: ${err}`
             });
-        });
+        }
+        else {
+            let AnnouncementColor = "primary";
+            switch (IsAnnouncement) {
+                case 2:
+                    AnnouncementColor = "blue";
+                    break;
+                case 3:
+                    AnnouncementColor = "green";
+                    break;
+                case 4:
+                    AnnouncementColor = "orange";
+                    break;
+                case 5:
+                    AnnouncementColor = "purple";
+                    break;
+            }
+            fetch('https://api.twitch.tv/helix/chat/announcements', {
+                "method": "POST",
+                "headers": {
+                    "Client-ID": client_id,
+                    "Authorization": "Bearer " + access_token,
+                    'Content-Type': 'application/json'
+                },
+                "body": JSON.stringify({
+                    "broadcaster_id": user_id,
+                    "moderator_id": user_id,
+                    "message": MessageInput.substring(2),
+                    "color": AnnouncementColor
+                })
+            }).then(async res => {
+                if (!res.ok) {
+                    return Promise.reject(await res.json());
+                }
+                console.log("[Multistream Chat] Success on sending announcement (Twitch)");
+            }).catch(err => {
+                HandleMessage({
+                    "type": "event",
+                    "message": `Failed to send Twitch announcement ${err}`
+                });
+            });
+        }
     }
     // YouTube
     if (YTChatID.length > 0) {
@@ -865,7 +928,6 @@ function OnHidden() {
 
         for (const QueuedPromise of QueuedPromisedList) {
             QueuedPromise();
-            delete QueuedPromise;
         }
         QueuedPromisedList = [];
 
@@ -893,7 +955,6 @@ document.querySelector('#Switch').addEventListener('click', (ev) => {
 
         for (const QueuedPromise of QueuedPromisedList) {
             QueuedPromise();
-            delete QueuedPromise;
         }
         QueuedPromisedList = [];
 
@@ -983,7 +1044,6 @@ document.querySelector('#Messages').addEventListener('scroll', (ev) => {
 
             for (const QueuedPromise of QueuedPromisedList) {
                 QueuedPromise();
-                delete QueuedPromise;
             }
             QueuedPromisedList = [];
 
@@ -1762,13 +1822,37 @@ function HandleMessage(Payload) {
                             });
                         }
                         else if (Payload.platform === "Kick") {
-                            // Public API does not have an endpoint for deleting messages
-                            LoadingIcon.remove();
-                            target.querySelector('svg').style = "";
+                            fetch('https://api.kick.com/public/v1/chat/' + Payload.id, {
+                                "method": "DELETE",
+                                "headers": {
+                                    "Authorization": "Bearer " + KickAccessToken,
+                                    'Content-Type': 'application/json'
+                                }
+                            }).then(async res => {
+                                if (!res.ok) {
+                                    return Promise.reject(await res.json());
+                                }
+                                LoadingIcon.remove();
+                                target.querySelector('svg').style = "";
 
-                            HandleMessage({
-                                "type": "event",
-                                "message": "To delete this message for everyone, please visit kick.com/yourchannel as Kick does not support deleting messages through third-party apps."
+                                HandleMessage({
+                                    "type": "event",
+                                    "message": `You deleted ${Payload.person.username}'s message`,
+                                    "match_if_needed": `KKDELETE:${Payload.id}`,
+                                    "you_message": true
+                                });
+                            }).catch(err => {
+                                let message = err.error ? err.error.message : (err.message ?? err);
+                                LoadingIcon.remove();
+                                target.disabled = false;
+                                target.querySelector('svg').style = "";
+                                HandleMessage({
+                                    "type": "event",
+                                    "message": "Unable to delete message: " + message
+                                });
+
+                                a.querySelector('.Msg').style = "";
+                                a.querySelector('.Msg').classList.remove('Strike');
                             });
                         }
                         else if (Payload.platform === "ALL") {
@@ -1777,12 +1861,13 @@ function HandleMessage(Payload) {
                             const Kick_MsgId = a.getAttribute('data-kk');
                             let A1 = TTV_MsgId === null;
                             let A2 = YT_MsgId === null;
-                            let ACall = (IsOnlyKick = false) => {
+                            let A3 = Kick_MsgId === null;
+                            let ACall = () => {
                                 LoadingIcon.remove();
                                 target.querySelector('svg').style = "";
                                 HandleMessage({
                                     "type": "event",
-                                    "message": IsOnlyKick ? "To delete this message for everyone, please visit kick.com/yourchannel as Kick does not support deleting messages through third-party apps." : `Deleted message on all platforms`,
+                                    "message": `Successfully deleted message on all platforms`,
                                     "match_if_needed": `DELETE:${Payload.id}`
                                 });
                             };
@@ -1798,7 +1883,7 @@ function HandleMessage(Payload) {
                                         return Promise.reject(await res.json());
                                     }
                                     A1 = true;
-                                    if (A1 && A2) ACall();
+                                    if (A1 && A2 && A3) ACall();
                                 }).catch(err => {
                                     let message = err.message ?? err;
                                     LoadingIcon.remove();
@@ -1820,7 +1905,7 @@ function HandleMessage(Payload) {
                                         return Promise.reject(await res.json());
                                     }
                                     A2 = true;
-                                    if (A1 && A2) ACall();
+                                    if (A1 && A2 && A3) ACall();
                                 }).catch(err => {
                                     let message = err.error ? err.error.message : (err.message ?? err);
                                     LoadingIcon.remove();
@@ -1830,9 +1915,27 @@ function HandleMessage(Payload) {
                                     });;
                                 });
                             }
-                            if (A1 && A2) // No support
-                            {
-                                ACall(true);
+                            if (!A3) {
+                                fetch('https://api.kick.com/public/v1/chat/' + Kick_MsgId, {
+                                    "method": "DELETE",
+                                    "headers": {
+                                        "Authorization": "Bearer " + KickAccessToken,
+                                        'Content-Type': 'application/json'
+                                    }
+                                }).then(async res => {
+                                    if (!res.ok) {
+                                        return Promise.reject(await res.json());
+                                    }
+                                    A3 = true;
+                                    if (A1 && A2 && A3) ACall();
+                                }).catch(err => {
+                                    let message = err.error ? err.error.message : (err.message ?? err);
+                                    LoadingIcon.remove();
+                                    HandleMessage({
+                                        "type": "event",
+                                        "message": "Unable to delete message on Kick: " + message
+                                    });;
+                                });
                             }
                         }
                     });
@@ -1865,7 +1968,6 @@ function HandleMessage(Payload) {
             }
             for (const WaitingEvent of WaitingEvents) {
                 WaitingEvent();
-                delete WaitingEvent;
             }
             WaitingEvents = [];
         }, LastChat - performance.now());
@@ -2125,8 +2227,7 @@ async function HandleYTMessages(Messages = [], Duration = 0) {
     if (Messages.length > 10 || Messages.length === 1) Duration = 0;
 
     const RemoveAtSymbol = (str) => {
-        if (str.startsWith("@"))
-        {
+        if (str.startsWith("@")) {
             str = str.substring(1);
         }
         return str;
@@ -2581,7 +2682,7 @@ function InitRefresh(rt, timeout = -1) {
 function Refresh(rt) {
     localStorage.removeItem('ytexpiresin');
     EncStorage.removeItem('ytrefresh');
-    return fetch('https://seenwalex.wixsite.com/chat-live/_functions/GAPI/Refresh', {
+    return fetch('https://multistream-tools.onrender.com/RefreshAccess/YouTube', {
         "method": "POST",
         "headers": {
             "Content-Type": "application/json"
@@ -2645,7 +2746,7 @@ async function TWRefresh(rt) {
     if (rt === null) rt = await EncStorage.getItem('saved_refresh_token');
     localStorage.removeItem('saved_expiresin');
     EncStorage.removeItem('saved_refresh_token');
-    return fetch('https://seenwalex.wixsite.com/chat-live/_functions/TWAPI/Refresh', {
+    return fetch('https://multistream-tools.onrender.com/RefreshAccess/Twitch', {
         "method": "POST",
         "headers": {
             "Content-Type": "application/json"
@@ -3872,7 +3973,7 @@ function processToken(token) {
                 // Event:
                 HandleMessage({
                     "type": "event",
-                    "message": `${event.moderator_user_name} shouted-out <a href="https://twitch.tv/${event.to_broadcaster_user_login}" target="_blank">${event.to_broadcaster_user_name}</a> for your ${event.viewer_count} ${(event.viewer_count === 1 ? "viewer" : "viewers")}`
+                    "message": `${event.moderator_user_name} shouted out <a href="https://twitch.tv/${event.to_broadcaster_user_login}" target="_blank">${event.to_broadcaster_user_name}</a> for your ${event.viewer_count} ${(event.viewer_count === 1 ? "viewer" : "viewers")}`
                 });
             });
 
@@ -4083,7 +4184,7 @@ function requestHooks(user_id) {
         // 'automod.message.update': { version: '2', condition: { broadcaster_user_id: user_id, moderator_user_id: user_id } },
         // 'automod.terms.update': { version: '1', condition: { broadcaster_user_id: user_id, moderator_user_id: user_id } },
 
-        'channel.ad_break.begin': { version: '1', condition: { broadcaster_user_id: user_id } },
+        // 'channel.ad_break.begin': { version: '1', condition: { broadcaster_user_id: user_id } },
 
         'channel.chat.clear_user_messages': { version: '1', condition: { broadcaster_user_id: user_id, user_id: user_id } },
         'channel.chat.message': { version: '1', condition: { broadcaster_user_id: user_id, user_id: user_id } },

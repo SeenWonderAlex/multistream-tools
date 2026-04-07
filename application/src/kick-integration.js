@@ -227,7 +227,7 @@ async function KickRefresh(rt) {
     if (rt === null) { rt = await EncStorage.getItem('kkrefresh'); }
     localStorage.removeItem('kkexpiresin');
     EncStorage.removeItem('kkrefresh');
-    return fetch('https://seenwalex.wixsite.com/chat-live/_functions/KickAPI/Refresh', {
+    return fetch('https://multistream-tools.onrender.com/RefreshAccess/Kick', {
         "method": "POST",
         "headers": {
             "Content-Type": "application/json"
