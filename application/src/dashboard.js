@@ -133,7 +133,7 @@ async function handleConnectedAccounts() {
             document.querySelector(".Platform3").disabled = true;
             WaitFor3 = false;
             if ((await EncStorage.getItem('kkrefresh')) != null) {
-                TWInitRefresh((await EncStorage.getItem('kkrefresh')), -1)
+                KickInitRefresh((await EncStorage.getItem('kkrefresh')), -1)
                     .then(async (v) => {
                         if (!v) return Promise.reject("You must verify again to continue with Kick");
                         KickGatherUser();
