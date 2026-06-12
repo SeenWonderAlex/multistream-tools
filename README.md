@@ -12,7 +12,6 @@ Currently contains:
 
 TODO:
 - Resubmit YouTube app for verification.
-- Replace Mod Buttons icons as my own. Designs currently taken from Twitch and planned to be replaced.
 - Add more missing features, such as Automod, seeing Suspicious User messages, ban & unban commands.
 
 If there are any bugs or you want to request something, feel free to use the issues tab.
