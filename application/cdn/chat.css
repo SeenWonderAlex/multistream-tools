@@ -229,6 +229,7 @@
     width: 0px;
     display: inline-block;
     background-color: rgb(26, 26, 26);
+    user-select: none;
 }
 
 .Message>.PFP {
@@ -358,6 +359,37 @@
     top: 1px;
     display: inline-block;
     color: rgb(171, 171, 171);
+}
+
+/* Sticky Top */
+.StickyTop {
+    z-index: 10;
+    position: absolute;
+    background-color: rgb(19, 19, 51);
+    border: 2px solid black;
+    border-radius: 4px;
+    top: 5px;
+    left: 1px;
+    width: calc(100% - 10px);
+}
+
+.StickyTop > .Time {
+    top: -5px;
+}
+.StickyTop > .ModActions > button {
+    top: -2px;
+}
+.StickyTop > .PFP {
+    top: 4px;
+}
+.StickyTop > .Badges > img {
+    top: 1px;
+}
+.StickyTop > .Text {
+    top: -5px;
+}
+.StickyTop > .TextNoPadding {
+    top: -5px;
 }
 
 /* Groups */

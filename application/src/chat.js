@@ -2053,6 +2053,7 @@ let WebSocketSupported = /MultistreamTools/i.test(navigator.userAgent);
 let NextPageToken = "";
 let socket = null;
 let DoNotReconnect = false;
+let ReconnectAttempts = 0;
 
 function ConnectSocket() {
     if (socket && socket.connected) return;
@@ -2110,12 +2111,21 @@ function ConnectSocket() {
     socket.on("connect_error", (err) => {
         console.log(`connect_error due to ${err.message}`);
         if (YTDisconnect) return;
-        HandleMessage({
-            "type": "event",
-            "message": "Bug Report: Unable to connect to YouTube Low-Latency chat. Using fallback polling (website behavior)."
-        });
-        WebSocketSupported = false;
-        PollChatMessages();
+        if (ReconnectAttempts >= 5) {
+            HandleMessage({
+                "type": "event",
+                "message": "Bug Report: Unable to connect to YouTube Low-Latency chat. Using fallback polling (website behavior)."
+            });
+            WebSocketSupported = false;
+            PollChatMessages();
+        }
+        else {
+            ReconnectAttempts++;
+            console.log("Attempting to reconnect " + ReconnectAttempts + "/5");
+            setTimeout(() => {
+                ConnectSocket();
+            }, 1000 * ReconnectAttempts)
+        }
     });
 
     socket.on("connect", () => {
@@ -2128,6 +2138,7 @@ function ConnectSocket() {
         Span.style.color = "gray";
 
         Span.innerText = "[Chat] YouTube (Low-Latency) is connected!";
+        ReconnectAttempts = 0;
         EventHTML.appendChild(Gap);
         EventHTML.appendChild(Span);
         document.getElementById('Messages').appendChild(EventHTML);
@@ -2138,6 +2149,27 @@ function ConnectSocket() {
         console.log(reason);
         if (reason != "io server disconnect" && reason != "io client disconnect" && reason != "parse error" && !DoNotReconnect && !YTDisconnect) {
             ConnectSocket();
+
+            const EventHTML = document.createElement('div');
+            EventHTML.className = "Message UserEvent";
+            const Gap = document.createElement('div');
+            Gap.className = "gap";
+            const Span = document.createElement('span');
+            Span.className = "Msg Text";
+            Span.style.color = "gray";
+
+            Span.innerText = "[Chat] Disconnected from YouTube's Low-Latency chat. Attempting to reconnect.";
+            EventHTML.appendChild(Gap);
+            EventHTML.appendChild(Span);
+            document.getElementById('Messages').appendChild(EventHTML);
+            if (IsAtTheBottom) document.getElementById('Messages').scrollTo(0, document.getElementById('Messages').scrollHeight)
+        }
+        else if (YTDisconnect || DoNotReconnect) {
+            Span.innerText = "[Chat] Disconnected from YouTube's Low-Latency chat.";
+            EventHTML.appendChild(Gap);
+            EventHTML.appendChild(Span);
+            document.getElementById('Messages').appendChild(EventHTML);
+            if (IsAtTheBottom) document.getElementById('Messages').scrollTo(0, document.getElementById('Messages').scrollHeight)
         }
     });
 }
@@ -2455,6 +2487,8 @@ async function HandleYTMessages(Messages = [], Duration = 0) {
 
             case "membershipGiftingEvent":
             case "giftMembershipReceivedEvent":
+
+            case "giftEvent":
                 const Snippet3 = Message.snippet;
                 let JsonTemplate2 = {
                     "type": "Message",
@@ -2465,7 +2499,7 @@ async function HandleYTMessages(Messages = [], Duration = 0) {
                         "profilePicture": Message.authorDetails.profileImageUrl,
                         "id": Message.authorDetails.channelId
                     },
-                    "time": new Date(Snippet.publishedAt).getTime(),
+                    "time": new Date(Snippet3.publishedAt).getTime(),
                     "badge_platform": "",
                     "badge_user": "",
                     "badge_modtype": "",
@@ -2514,47 +2548,54 @@ async function HandleYTMessages(Messages = [], Duration = 0) {
 
                 if (Snippet3.newSponsorDetails) {
                     if (!Snippet3.newSponsorDetails.isUpgrade) {
-                        msgHTML.push(`<span style="color: #00ff30;">is now a member! (${htmlEscape2(Snippet3.newSponsorDetails.memberLevelName)})</span>`);
+                        msgHTML2.push(`<span style="color: #00ff30;">is now a member! (${htmlEscape2(Snippet3.newSponsorDetails.memberLevelName)})</span>`);
                     }
                     else {
-                        msgHTML.push(`<span style="color: #00ff30;">has upgraded to: ${htmlEscape2(Snippet3.newSponsorDetails.memberLevelName)}</span>`);
+                        msgHTML2.push(`<span style="color: #00ff30;">has upgraded to: ${htmlEscape2(Snippet3.newSponsorDetails.memberLevelName)}</span>`);
                     }
                 }
                 else if (Snippet3.memberMilestoneChatDetails) {
                     const OneMonth = Snippet3.memberMilestoneChatDetails.memberMonth === 1;
-                    msgHTML.push(`<span style="color: #95ffa9">has been a member for ${Snippet3.memberMilestoneChatDetails.memberMonth} ${OneMonth ? "month" : "months"}! (${htmlEscape2(Snippet3.memberMilestoneChatDetails.memberLevelName)})</span>`);
+                    msgHTML2.push(`<span style="color: #95ffa9">has been a member for ${Snippet3.memberMilestoneChatDetails.memberMonth} ${OneMonth ? "month" : "months"}! (${htmlEscape2(Snippet3.memberMilestoneChatDetails.memberLevelName)})</span>`);
                     if (Snippet.memberMilestoneChatDetails.userComment.length > 0) {
-                        msgHTML.push(`<span>: ${htmlEscape2(Snippet.memberMilestoneChatDetails.userComment)}</span>`);
+                        msgHTML2.push(`<span>: ${htmlEscape2(Snippet.memberMilestoneChatDetails.userComment)}</span>`);
                     }
                 }
                 else if (Snippet3.superChatDetails) {
                     const Color = getTierColor(Snippet3.superChatDetails.tier);
-                    msgHTML.push(`<span style="color: ${Color}">donated ${htmlEscape2(Snippet3.superChatDetails.amountDisplayString)}</span>`);
+                    msgHTML2.push(`<span style="color: ${Color}">donated ${htmlEscape2(Snippet3.superChatDetails.amountDisplayString)}</span>`);
 
                     const SuperChatMessage = Snippet3.superChatDetails.userComment;
                     if (SuperChatMessage.length > 0) {
-                        msgHTML.push(`<span>: ${htmlEscape2(SuperChatMessage)}</span>`);
+                        msgHTML2.push(`<span>: ${htmlEscape2(SuperChatMessage)}</span>`);
                     }
                 }
                 else if (Snippet3.superStickerDetails) {
                     const Color = getTierColor(Snippet3.superStickerDetails.tier);
-                    msgHTML.push(`<span style="color: ${Color}">donated `);
+                    msgHTML2.push(`<span style="color: ${Color}">donated `);
                     let Sticker = "https://lh3.googleusercontent.com/G2OgWJkuvSullUPp2i09zG_WR0IpQu-6Ti4pFXn_FJ1OkR6zU5GdiP9cBavimQopETyojInsRCe8uefjJBqn";
                     if (YTStickers[Snippet3.superStickerDetails.superStickerMetadata.stickerId]) {
                         Sticker = YTStickers[Snippet3.superStickerDetails.superStickerMetadata.stickerId];
                     }
-                    msgHTML.push('<img loading="lazy" title="' + htmlEscape(Snippet.superStickerDetails.superStickerMetadata.altText) + '" src="'
+                    msgHTML2.push('<img loading="lazy" title="' + htmlEscape(Snippet.superStickerDetails.superStickerMetadata.altText) + '" src="'
                         + `${Sticker}`
                         + '">');
-                    msgHTML.push(` for ${htmlEscape2(Snippet3.superStickerDetails.amountDisplayString)}</span>`);
+                    msgHTML2.push(` for ${htmlEscape2(Snippet3.superStickerDetails.amountDisplayString)}</span>`);
                 }
                 else if (Snippet3.membershipGiftingDetails) {
                     const OneMembership = Snippet.membershipGiftingDetails.giftMembershipsCount === 1;
-                    msgHTML.push(`<span style="color: #f35aff">is gifting ${Snippet3.membershipGiftingDetails.giftMembershipsCount} ${OneMembership ? "membership" : "memberships"} of ${htmlEscape2(Snippet3.membershipGiftingDetails.giftMembershipsLevelName)}</span>`);
+                    msgHTML2.push(`<span style="color: #f35aff">is gifting ${Snippet3.membershipGiftingDetails.giftMembershipsCount} ${OneMembership ? "membership" : "memberships"} of ${htmlEscape2(Snippet3.membershipGiftingDetails.giftMembershipsLevelName)}</span>`);
                     //#00ff61
                 }
                 else if (Snippet3.giftMembershipReceivedDetails) {
-                    msgHTML.push(`<span style="color: #00a1a1ff">is now a member of ${htmlEscape2(Snippet3.giftMembershipReceivedDetails.memberLevelName)}</span>`);
+                    msgHTML2.push(`<span style="color: #00a1a1ff">is now a member of ${htmlEscape2(Snippet3.giftMembershipReceivedDetails.memberLevelName)}</span>`);
+                }
+                else if (Snippet3.giftEventDetails) {
+                    const numberWithCommas = (x) => {
+                        return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                    };
+                    const gift = Snippet3.giftEventDetails.giftMetadata;
+                    msgHTML2.push(`<span style="color: rgb(0, 161, 40)">has gifted </span><span>${htmlEscape2(gift.giftName)}${(gift.comboCount > 0) ? ("<span style=\"color: rgb(0, 255, 64);\"> x" + gift.comboCount + "</span>") : ""}</span><span style="color: rgb(148, 255, 175)"> (${numberWithCommas(gift.jewelsAmount)} Jewels)</span>`);
                 }
 
                 JsonTemplate2.message = (msgHTML2.length !== 0) ? msgHTML2.join("") : Snippet3.displayMessage;

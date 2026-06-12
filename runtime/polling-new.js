@@ -1377,9 +1377,9 @@ function processToken(token) {
             if (resp.error != undefined) {
                 return Promise.reject(resp.error + ": " + resp.message);
             }
-            if (resp.data[0].broadcaster_type === "") {
-                return Promise.reject("not_a_affiliate");
-            }
+            // if (resp.data[0].broadcaster_type === "") {
+            //     return Promise.reject("not_a_affiliate");
+            // }
             if (window.location.hash.length > 0) window.location.hash = "#authorized";
             if (document.querySelectorAll("#ConnectedPlatforms > span")[0]) {
                 document.querySelectorAll("#ConnectedPlatforms > span")[0].innerText = resp.data[0].display_name;

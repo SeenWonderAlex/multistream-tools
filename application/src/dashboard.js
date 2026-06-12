@@ -538,7 +538,7 @@ function InitializeTitleWidget() {
                         KickLabel.querySelector('span').innerText = "Not Live";
                         return;
                     }
-                    KickLabel.querySelector('span').innerText = res.data[0].stream_title || "[NO TITLE]";
+                    KickLabel.querySelector('span').innerText = res.data[0].stream_title || "[NO TITLE OR NOT LIVE]";
                 }
                 else {
                     return Promise.reject("Error from server");
